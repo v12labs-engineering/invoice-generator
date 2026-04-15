@@ -49,12 +49,24 @@ type ClientInfo = {
   taxId?: string | null;
 };
 
+type Initial = {
+  clientId?: string;
+  issueDate?: string;
+  dueDate?: string;
+  notes?: string;
+  terms?: string;
+  template?: TemplateId;
+  lines?: Line[];
+};
+
 export function InvoiceForm({
   clients,
   defaultCurrency,
   logoUrl,
   defaultTemplate,
   business,
+  initial,
+  submitLabel = "Save draft",
   onSubmit,
 }: {
   clients: ClientInfo[];
@@ -69,20 +81,24 @@ export function InvoiceForm({
     taxId?: string | null;
     bankDetails?: string | null;
   };
+  initial?: Initial;
+  submitLabel?: string;
   onSubmit: (fd: FormData) => Promise<void>;
 }) {
   const today = new Date().toISOString().slice(0, 10);
 
-  const [clientId, setClientId] = useState("");
-  const [issueDate, setIssueDate] = useState(today);
-  const [dueDate, setDueDate] = useState("");
-  const [notes, setNotes] = useState("");
-  const [terms, setTerms] = useState("");
-  const [template, setTemplate] = useState<TemplateId>(defaultTemplate);
+  const [clientId, setClientId] = useState(initial?.clientId ?? "");
+  const [issueDate, setIssueDate] = useState(initial?.issueDate ?? today);
+  const [dueDate, setDueDate] = useState(initial?.dueDate ?? "");
+  const [notes, setNotes] = useState(initial?.notes ?? "");
+  const [terms, setTerms] = useState(initial?.terms ?? "");
+  const [template, setTemplate] = useState<TemplateId>(initial?.template ?? defaultTemplate);
   const [currentLogoUrl, setCurrentLogoUrl] = useState(logoUrl);
-  const [lines, setLines] = useState<Line[]>([
-    { description: "", quantity: 1, unitPrice: 0, lineDiscount: 0, taxRate: 0, sortOrder: 0 },
-  ]);
+  const [lines, setLines] = useState<Line[]>(
+    initial?.lines ?? [
+      { description: "", quantity: 1, unitPrice: 0, lineDiscount: 0, taxRate: 0, sortOrder: 0 },
+    ],
+  );
 
   const totals = calcInvoiceTotals(lines, 0);
   const selectedClient = clients.find((c) => c.id === clientId);
@@ -229,15 +245,17 @@ export function InvoiceForm({
                 <TableBody>
                   {lines.map((l, i) => (
                     <TableRow key={i}>
-                      <TableCell className="px-3">
-                        <Input
+                      <TableCell className="px-3 align-top">
+                        <Textarea
                           value={l.description}
                           onChange={(e) => update(i, { description: e.target.value })}
                           placeholder="Describe the work..."
                           required
+                          rows={2}
+                          className="min-h-16 resize-y"
                         />
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="align-top">
                         <Input
                           type="number"
                           min={1}
@@ -245,7 +263,7 @@ export function InvoiceForm({
                           onChange={(e) => update(i, { quantity: Number(e.target.value) })}
                         />
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="align-top">
                         <Input
                           type="number"
                           step="0.01"
@@ -255,14 +273,14 @@ export function InvoiceForm({
                           }
                         />
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="align-top">
                         <Input
                           type="number"
                           value={l.taxRate}
                           onChange={(e) => update(i, { taxRate: Number(e.target.value) })}
                         />
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right align-top">
                         <Button
                           type="button"
                           variant="ghost"
@@ -354,7 +372,7 @@ export function InvoiceForm({
         <input type="hidden" name="template" value={template} />
 
         <div className="flex justify-end">
-          <FormSubmitButton>Save draft</FormSubmitButton>
+          <FormSubmitButton>{submitLabel}</FormSubmitButton>
         </div>
       </form>
 

@@ -128,6 +128,47 @@ export async function updateDraftInvoice(id: string, input: unknown): Promise<Re
   }
 }
 
+export async function finalizeInvoice(id: string): Promise<Result<null>> {
+  const userId = await requireUserId();
+
+  const invoice = await db.invoice.findFirst({ where: { id, userId } });
+  if (!invoice) return err("Not found");
+  if (invoice.status !== "DRAFT") return err("Only drafts can be finalized");
+
+  try {
+    let number = invoice.number;
+    if (!number) {
+      number = await assignInvoiceNumber(userId);
+      await db.invoice.update({ where: { id }, data: { number } });
+    }
+
+    const built = await buildPdfData(id, userId);
+    if (!built) return err("Failed to build PDF data");
+    const pdfBuffer = await renderInvoicePdf(built.data, built.template);
+
+    let pdfUrl: string | null = null;
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      const blob = await put(`invoices/${number}.pdf`, pdfBuffer, {
+        access: "public",
+        contentType: "application/pdf",
+        allowOverwrite: true,
+      });
+      pdfUrl = blob.url;
+    }
+
+    await db.invoice.update({
+      where: { id },
+      data: { status: "SENT", sentAt: new Date(), ...(pdfUrl ? { pdfUrl } : {}) },
+    });
+
+    revalidatePath(`/invoices/${id}`);
+    revalidatePath("/invoices");
+    return ok(null);
+  } catch (e) {
+    return err(e instanceof Error ? e.message : "Finalize failed");
+  }
+}
+
 export async function voidInvoice(id: string): Promise<Result<null>> {
   const userId = await requireUserId();
   const result = await db.invoice.updateMany({

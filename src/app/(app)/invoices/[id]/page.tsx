@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-import { Ban, Download, Receipt, Send } from "lucide-react";
-import { getInvoice, sendInvoice, voidInvoice } from "@/lib/actions/invoices";
+import { Ban, CheckCircle2, Download, Pencil, Receipt, Send } from "lucide-react";
+import { finalizeInvoice, getInvoice, sendInvoice, voidInvoice } from "@/lib/actions/invoices";
 import { recordPayment } from "@/lib/actions/payments";
 import { formatMoney } from "@/lib/money";
 import { effectiveStatus, StatusBadge } from "@/components/status-badge";
@@ -40,8 +40,13 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     "use server";
     await voidInvoice(id);
   }
+  async function finalize() {
+    "use server";
+    await finalizeInvoice(id);
+  }
 
   const status = effectiveStatus(invoice);
+  const isDraft = invoice.status === "DRAFT";
   const canSend = invoice.status === "DRAFT";
   const canRecordPayment =
     invoice.status !== "DRAFT" && invoice.status !== "VOID" && invoice.balance > 0;
@@ -187,6 +192,24 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
               <CardTitle>Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
+              {isDraft && (
+                <>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    render={<a href={`/invoices/${invoice.id}/edit`} />}
+                  >
+                    <Pencil className="size-4" />
+                    Edit draft
+                  </Button>
+                  <form action={finalize}>
+                    <Button type="submit" className="w-full justify-start">
+                      <CheckCircle2 className="size-4" />
+                      Finalize invoice
+                    </Button>
+                  </form>
+                </>
+              )}
               <Button
                 variant="outline"
                 className="w-full justify-start"
