@@ -7,6 +7,10 @@ import { err, ok, type Result } from "@/lib/result";
 import { revalidatePath } from "next/cache";
 import { requireUserId } from "./_shared";
 import type { InvoiceStatus } from "@prisma/client";
+import { assignInvoiceNumber } from "@/lib/invoice-number";
+import { buildPdfData, renderInvoicePdf } from "@/lib/pdf/render";
+import { sendInvoiceEmail } from "@/lib/email/send-invoice";
+import { put } from "@vercel/blob";
 
 function buildLineData(lines: InvoiceLineInput[]) {
   return lines.map((l) => {
@@ -131,4 +135,67 @@ export async function voidInvoice(id: string): Promise<Result<null>> {
   if (result.count === 0) return err("Not found");
   revalidatePath("/invoices");
   return ok(null);
+}
+
+export async function sendInvoice(
+  id: string,
+  recipientEmail: string,
+  message?: string,
+): Promise<Result<null>> {
+  const userId = await requireUserId();
+
+  const invoice = await db.invoice.findFirst({
+    where: { id, userId },
+    include: { client: true },
+  });
+  if (!invoice) return err("Not found");
+  if (invoice.status === "VOID") return err("Invoice is void");
+  if (!recipientEmail) return err("Recipient email required");
+
+  try {
+    // Assign number if not yet assigned
+    let number = invoice.number;
+    if (!number) {
+      number = await assignInvoiceNumber(userId);
+      await db.invoice.update({ where: { id }, data: { number } });
+    }
+
+    // Render PDF
+    const pdfData = await buildPdfData(id, userId);
+    if (!pdfData) return err("Failed to build PDF data");
+    const pdfBuffer = await renderInvoicePdf(pdfData);
+
+    // Upload to Vercel Blob
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      return err("BLOB_READ_WRITE_TOKEN not configured");
+    }
+    const blob = await put(`invoices/${number}.pdf`, pdfBuffer, {
+      access: "public",
+      contentType: "application/pdf",
+      allowOverwrite: true,
+    });
+
+    // Send email
+    await sendInvoiceEmail({
+      to: recipientEmail,
+      subject: `Invoice ${number} from ${pdfData.business.name}`,
+      body:
+        message ??
+        `Hi ${invoice.client.name},\n\nPlease find invoice ${number} attached.\n\nTotal: ${(invoice.total / 100).toFixed(2)} ${invoice.currency}\nDue: ${pdfData.dueDate}\n\nThanks.`,
+      pdfBuffer,
+      pdfFilename: `${number}.pdf`,
+    });
+
+    // Transition to SENT
+    await db.invoice.update({
+      where: { id },
+      data: { status: "SENT", sentAt: new Date(), pdfUrl: blob.url },
+    });
+
+    revalidatePath(`/invoices/${id}`);
+    revalidatePath("/invoices");
+    return ok(null);
+  } catch (e) {
+    return err(e instanceof Error ? e.message : "Send failed");
+  }
 }
