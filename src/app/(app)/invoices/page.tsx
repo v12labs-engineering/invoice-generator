@@ -44,7 +44,7 @@ export default async function InvoicesPage() {
           }
         />
       ) : (
-        <div className="overflow-hidden rounded-lg border bg-card">
+        <div className="overflow-x-auto rounded-lg border bg-card">
           <Table>
             <TableHeader className="bg-muted/40">
               <TableRow>

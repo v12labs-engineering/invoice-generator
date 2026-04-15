@@ -231,7 +231,7 @@ export function InvoiceForm({
             <CardDescription>Products, services, or one-off charges.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="overflow-hidden rounded-lg border">
+            <div className="hidden overflow-hidden rounded-lg border md:block">
               <Table>
                 <TableHeader className="bg-muted/40">
                   <TableRow>
@@ -299,11 +299,74 @@ export function InvoiceForm({
               </Table>
             </div>
 
+            <div className="space-y-3 md:hidden">
+              {lines.map((l, i) => (
+                <div key={i} className="space-y-3 rounded-lg border bg-muted/20 p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <Label className="text-xs text-muted-foreground">
+                      Item {i + 1}
+                    </Label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => setLines((ls) => ls.filter((_, idx) => idx !== i))}
+                      aria-label="Remove line"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </Button>
+                  </div>
+                  <Textarea
+                    value={l.description}
+                    onChange={(e) => update(i, { description: e.target.value })}
+                    placeholder="Describe the work..."
+                    required
+                    rows={2}
+                    className="min-h-16 resize-y bg-background"
+                  />
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Qty</Label>
+                      <Input
+                        type="number"
+                        inputMode="numeric"
+                        min={1}
+                        value={l.quantity}
+                        onChange={(e) => update(i, { quantity: Number(e.target.value) })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Price</Label>
+                      <Input
+                        type="number"
+                        inputMode="decimal"
+                        step="0.01"
+                        value={(l.unitPrice / 100).toString()}
+                        onChange={(e) =>
+                          update(i, { unitPrice: Math.round(Number(e.target.value) * 100) })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Tax (bps)</Label>
+                      <Input
+                        type="number"
+                        inputMode="numeric"
+                        value={l.taxRate}
+                        onChange={(e) => update(i, { taxRate: Number(e.target.value) })}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
+                className="w-full sm:w-auto"
                 onClick={() =>
                   setLines((ls) => [
                     ...ls,
@@ -322,7 +385,7 @@ export function InvoiceForm({
                 Add line
               </Button>
 
-              <div className="min-w-[220px] space-y-1 text-sm">
+              <div className="w-full space-y-1 text-sm sm:w-auto sm:min-w-[220px]">
                 <div className="flex justify-between text-muted-foreground">
                   <span>Subtotal</span>
                   <span>{formatMoney(totals.subtotal, defaultCurrency)}</span>
@@ -376,7 +439,7 @@ export function InvoiceForm({
         </div>
       </form>
 
-      <div className="xl:sticky xl:top-6 xl:self-start">
+      <div className="hidden xl:sticky xl:top-6 xl:block xl:self-start">
         <Card className="overflow-hidden">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium">Live preview</CardTitle>

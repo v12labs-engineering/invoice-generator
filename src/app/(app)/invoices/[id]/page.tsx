@@ -67,7 +67,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
           title={invoice.number ?? ""}
           description={invoice.client.name}
           actions={
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <StatusBadge status={effectiveStatus(invoice)} />
               <form action={deleteDraft}>
                 <Button type="submit" variant="outline" size="sm">
