@@ -1,0 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  profile       BusinessProfile?
+  createdAt     DateTime  @default(now())
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  @@unique([identifier, token])
+}
+
+model BusinessProfile {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name              String
+  addressLines      String[]
+  email             String
+  phone             String?
+  logoUrl           String?
+  taxId             String?
+  bankDetails       String?
+  defaultCurrency   String   @default("USD")
+  defaultTaxRate    Int      @default(0)
+  invoicePrefix     String   @default("INV-")
+  nextInvoiceNumber Int      @default(1)
+  updatedAt         DateTime @updatedAt
+}
+
+model Client {
+  id           String    @id @default(cuid())
+  userId       String
+  name         String
+  email        String?
+  addressLines String[]
+  taxId        String?
+  notes        String?
+  archivedAt   DateTime?
+  invoices     Invoice[]
+  schedules    RecurringSchedule[]
+  createdAt    DateTime  @default(now())
+  @@index([userId])
+}
+
+model Product {
+  id             String   @id @default(cuid())
+  userId         String
+  name           String
+  description    String?
+  unitPrice      Int
+  currency       String
+  defaultTaxRate Int      @default(0)
+  archivedAt     DateTime?
+  createdAt      DateTime @default(now())
+  @@index([userId])
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PARTIAL
+  PAID
+  VOID
+}
+
+model Invoice {
+  id                  String        @id @default(cuid())
+  userId              String
+  number              String?       @unique
+  clientId            String
+  client              Client        @relation(fields: [clientId], references: [id])
+  issueDate           DateTime
+  dueDate             DateTime
+  currency            String
+  status              InvoiceStatus @default(DRAFT)
+  subtotal            Int
+  discountAmount      Int           @default(0)
+  taxAmount           Int           @default(0)
+  total               Int
+  amountPaid          Int           @default(0)
+  balance             Int
+  notes               String?
+  terms               String?
+  pdfUrl              String?
+  sentAt              DateTime?
+  recurringScheduleId String?
+  lines               InvoiceLine[]
+  payments            Payment[]
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  @@index([userId, status])
+  @@index([userId, issueDate])
+}
+
+model InvoiceLine {
+  id           String  @id @default(cuid())
+  invoiceId    String
+  invoice      Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  productId    String?
+  description  String
+  quantity     Int
+  unitPrice    Int
+  lineDiscount Int     @default(0)
+  taxRate      Int     @default(0)
+  lineTotal    Int
+  sortOrder    Int
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  invoiceId String
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  amount    Int
+  paidAt    DateTime
+  method    String
+  reference String?
+  note      String?
+  createdAt DateTime @default(now())
+}
+
+enum Cadence {
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+model RecurringSchedule {
+  id            String    @id @default(cuid())
+  userId        String
+  clientId      String
+  client        Client    @relation(fields: [clientId], references: [id])
+  templateJson  Json
+  cadence       Cadence
+  intervalCount Int       @default(1)
+  startDate     DateTime
+  endDate       DateTime?
+  nextRunAt     DateTime
+  lastRunAt     DateTime?
+  autoSend      Boolean   @default(false)
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  @@index([userId, active, nextRunAt])
+}
