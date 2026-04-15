@@ -22,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { FormSubmitButton } from "@/components/form-submit-button";
+import { LogoUpload } from "@/components/logo-upload";
 import { calcInvoiceTotals, formatMoney } from "@/lib/money";
 
 type Line = {
@@ -39,10 +40,12 @@ const selectClass =
 export function InvoiceForm({
   clients,
   defaultCurrency,
+  logoUrl,
   onSubmit,
 }: {
   clients: { id: string; name: string }[];
   defaultCurrency: string;
+  logoUrl: string | null;
   onSubmit: (fd: FormData) => Promise<void>;
 }) {
   const [lines, setLines] = useState<Line[]>([
@@ -62,6 +65,16 @@ export function InvoiceForm({
 
   return (
     <form action={submit} className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Branding</CardTitle>
+          <CardDescription>Your company logo, shown on every invoice PDF.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <LogoUpload initialUrl={logoUrl} />
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Details</CardTitle>

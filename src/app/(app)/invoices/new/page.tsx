@@ -30,7 +30,12 @@ export default async function NewInvoicePage() {
         title="New invoice"
         description="Draft a new invoice. You can send it after saving."
       />
-      <InvoiceForm clients={clients} defaultCurrency={profile?.defaultCurrency ?? "USD"} onSubmit={submit} />
+      <InvoiceForm
+        clients={clients}
+        defaultCurrency={profile?.defaultCurrency ?? "USD"}
+        logoUrl={profile?.logoUrl ?? null}
+        onSubmit={submit}
+      />
     </div>
   );
 }

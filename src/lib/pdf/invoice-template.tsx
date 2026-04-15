@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, Text, View, Image, StyleSheet } from "@react-pdf/renderer";
 import { formatMoney } from "@/lib/money";
 
 const styles = StyleSheet.create({
@@ -14,6 +14,7 @@ const styles = StyleSheet.create({
   col2: { flex: 1, textAlign: "right" },
   col3: { flex: 1.5, textAlign: "right" },
   col4: { flex: 1.5, textAlign: "right" },
+  logo: { width: 80, height: 80, marginBottom: 8, objectFit: "contain" },
   totals: { alignSelf: "flex-end", width: 220, marginTop: 16 },
   totalRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 3 },
   grand: { borderTopWidth: 1, borderColor: "#000", paddingTop: 6, marginTop: 6, fontFamily: "Helvetica-Bold" },
@@ -37,6 +38,7 @@ export type InvoicePdfData = {
     phone?: string | null;
     taxId?: string | null;
     bankDetails?: string | null;
+    logoUrl?: string | null;
   };
   client: { name: string; email?: string | null; addressLines: string[]; taxId?: string | null };
   lines: { description: string; quantity: number; unitPrice: number; lineTotal: number }[];
@@ -47,6 +49,7 @@ export const InvoiceDocument = ({ data }: { data: InvoicePdfData }) => (
     <Page size="A4" style={styles.page}>
       <View style={[styles.row, styles.section]}>
         <View>
+          {data.business.logoUrl && <Image src={data.business.logoUrl} style={styles.logo} />}
           <Text style={styles.h1}>{data.business.name}</Text>
           {data.business.addressLines.map((l, i) => <Text key={i} style={styles.small}>{l}</Text>)}
           <Text style={styles.small}>{data.business.email}</Text>

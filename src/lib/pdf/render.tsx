@@ -29,6 +29,7 @@ export async function buildPdfData(invoiceId: string, userId: string): Promise<I
       phone: profile.phone,
       taxId: profile.taxId,
       bankDetails: profile.bankDetails,
+      logoUrl: profile.logoUrl,
     },
     client: {
       name: invoice.client.name,
