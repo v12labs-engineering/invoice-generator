@@ -1,10 +1,13 @@
 import { notFound, redirect } from "next/navigation";
-import { Ban, CheckCircle2, Download, Pencil, Receipt, Send, Trash2 } from "lucide-react";
+import { Ban, CheckCircle2, Download, Receipt, Send, Trash2 } from "lucide-react";
+import { listClients } from "@/lib/actions/clients";
+import { getBusinessProfile } from "@/lib/actions/settings";
 import {
   deleteDraftInvoice,
   finalizeInvoice,
   getInvoice,
   sendInvoice,
+  updateDraftInvoice,
   voidInvoice,
 } from "@/lib/actions/invoices";
 import { recordPayment } from "@/lib/actions/payments";
@@ -15,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/page-header";
 import { FormSubmitButton } from "@/components/form-submit-button";
+import { InvoiceForm } from "@/components/invoice-form";
 import {
   Card,
   CardContent,
@@ -28,6 +32,103 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
   const invoice = await getInvoice(id);
   if (!invoice) notFound();
 
+  // Draft: render the editable form (same component used for /invoices/new) with a live preview.
+  if (invoice.status === "DRAFT") {
+    const [clients, profile] = await Promise.all([listClients(), getBusinessProfile()]);
+
+    async function save(formData: FormData) {
+      "use server";
+      const lines = JSON.parse(String(formData.get("linesJson") ?? "[]"));
+      await updateDraftInvoice(id, {
+        clientId: formData.get("clientId"),
+        issueDate: formData.get("issueDate"),
+        dueDate: formData.get("dueDate"),
+        currency: formData.get("currency"),
+        notes: formData.get("notes"),
+        terms: formData.get("terms"),
+        template: formData.get("template"),
+        globalDiscount: 0,
+        lines,
+      });
+    }
+    async function finalize() {
+      "use server";
+      await finalizeInvoice(id);
+    }
+    async function deleteDraft() {
+      "use server";
+      const res = await deleteDraftInvoice(id);
+      if (res.ok) redirect("/invoices");
+    }
+
+    return (
+      <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+        <PageHeader
+          title={invoice.number ?? ""}
+          description={invoice.client.name}
+          actions={
+            <div className="flex items-center gap-2">
+              <StatusBadge status={effectiveStatus(invoice)} />
+              <form action={deleteDraft}>
+                <Button type="submit" variant="outline" size="sm">
+                  <Trash2 className="size-3.5" />
+                  Delete
+                </Button>
+              </form>
+              <form action={finalize}>
+                <Button type="submit" size="sm">
+                  <CheckCircle2 className="size-3.5" />
+                  Finalize
+                </Button>
+              </form>
+            </div>
+          }
+        />
+        <InvoiceForm
+          clients={clients.map((c) => ({
+            id: c.id,
+            name: c.name,
+            email: c.email,
+            addressLines: c.addressLines,
+            taxId: c.taxId,
+          }))}
+          defaultCurrency={profile?.defaultCurrency ?? "USD"}
+          logoUrl={profile?.logoUrl ?? null}
+          defaultTemplate={profile?.defaultTemplate ?? "CLASSIC"}
+          business={{
+            name: profile?.name ?? "Your business",
+            addressLines: profile?.addressLines ?? [],
+            email: profile?.email ?? "",
+            phone: profile?.phone ?? null,
+            taxId: profile?.taxId ?? null,
+            bankDetails: profile?.bankDetails ?? null,
+          }}
+          initial={{
+            clientId: invoice.clientId,
+            issueDate: invoice.issueDate.toISOString().slice(0, 10),
+            dueDate: invoice.dueDate.toISOString().slice(0, 10),
+            notes: invoice.notes ?? "",
+            terms: invoice.terms ?? "",
+            template: (invoice.template ??
+              profile?.defaultTemplate ??
+              "CLASSIC") as "CLASSIC" | "MODERN" | "MINIMAL",
+            lines: invoice.lines.map((l) => ({
+              description: l.description,
+              quantity: l.quantity,
+              unitPrice: l.unitPrice,
+              lineDiscount: l.lineDiscount,
+              taxRate: l.taxRate,
+              sortOrder: l.sortOrder,
+            })),
+          }}
+          submitLabel="Save changes"
+          onSubmit={save}
+        />
+      </div>
+    );
+  }
+
+  // Non-draft: read-only summary with Send/Pay/Void actions.
   async function send(fd: FormData) {
     "use server";
     await sendInvoice(id, String(fd.get("to")), String(fd.get("message") ?? ""));
@@ -46,21 +147,9 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     "use server";
     await voidInvoice(id);
   }
-  async function finalize() {
-    "use server";
-    await finalizeInvoice(id);
-  }
-  async function deleteDraft() {
-    "use server";
-    const res = await deleteDraftInvoice(id);
-    if (res.ok) redirect("/invoices");
-  }
 
   const status = effectiveStatus(invoice);
-  const isDraft = invoice.status === "DRAFT";
-  const canSend = invoice.status === "DRAFT";
-  const canRecordPayment =
-    invoice.status !== "DRAFT" && invoice.status !== "VOID" && invoice.balance > 0;
+  const canRecordPayment = invoice.status !== "VOID" && invoice.balance > 0;
   const canVoid = invoice.status !== "VOID" && invoice.status !== "PAID";
 
   return (
@@ -103,11 +192,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                   value={formatMoney(invoice.total, invoice.currency)}
                   emphasis
                 />
-                <Row
-                  label="Paid"
-                  value={formatMoney(invoice.amountPaid, invoice.currency)}
-                  muted
-                />
+                <Row label="Paid" value={formatMoney(invoice.amountPaid, invoice.currency)} muted />
                 <Row
                   label="Balance"
                   value={formatMoney(invoice.balance, invoice.currency)}
@@ -116,37 +201,6 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
               </dl>
             </CardContent>
           </Card>
-
-          {canSend && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Send invoice</CardTitle>
-                <CardDescription>Email this invoice to your client.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form action={send} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="to">Recipient</Label>
-                    <Input
-                      id="to"
-                      name="to"
-                      type="email"
-                      required
-                      defaultValue={invoice.client.email ?? ""}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="message">Message (optional)</Label>
-                    <Input id="message" name="message" />
-                  </div>
-                  <FormSubmitButton>
-                    <Send className="size-4" />
-                    Send invoice
-                  </FormSubmitButton>
-                </form>
-              </CardContent>
-            </Card>
-          )}
 
           {canRecordPayment && (
             <Card>
@@ -195,6 +249,35 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
               </CardContent>
             </Card>
           )}
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Email invoice</CardTitle>
+              <CardDescription>Send this invoice to your client.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form action={send} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="to">Recipient</Label>
+                  <Input
+                    id="to"
+                    name="to"
+                    type="email"
+                    required
+                    defaultValue={invoice.client.email ?? ""}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="message">Message (optional)</Label>
+                  <Input id="message" name="message" />
+                </div>
+                <FormSubmitButton>
+                  <Send className="size-4" />
+                  Send invoice
+                </FormSubmitButton>
+              </form>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="space-y-6">
@@ -203,24 +286,6 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
               <CardTitle>Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {isDraft && (
-                <>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start"
-                    render={<a href={`/invoices/${invoice.id}/edit`} />}
-                  >
-                    <Pencil className="size-4" />
-                    Edit draft
-                  </Button>
-                  <form action={finalize}>
-                    <Button type="submit" className="w-full justify-start">
-                      <CheckCircle2 className="size-4" />
-                      Finalize invoice
-                    </Button>
-                  </form>
-                </>
-              )}
               <Button
                 variant="outline"
                 className="w-full justify-start"
@@ -231,7 +296,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                 <Download className="size-4" />
                 Download PDF
               </Button>
-              {canVoid && !isDraft && (
+              {canVoid && (
                 <form action={voidIt}>
                   <Button
                     variant="destructive"
@@ -240,18 +305,6 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                   >
                     <Ban className="size-4" />
                     Void invoice
-                  </Button>
-                </form>
-              )}
-              {isDraft && (
-                <form action={deleteDraft}>
-                  <Button
-                    variant="destructive"
-                    type="submit"
-                    className="w-full justify-start"
-                  >
-                    <Trash2 className="size-4" />
-                    Delete draft
                   </Button>
                 </form>
               )}
