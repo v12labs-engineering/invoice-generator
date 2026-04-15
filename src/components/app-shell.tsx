@@ -1,44 +1,71 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { LogOut, Receipt } from "lucide-react";
 import { supabaseServer } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
-
-const nav = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/invoices", label: "Invoices" },
-  { href: "/clients", label: "Clients" },
-  { href: "/products", label: "Products" },
-  { href: "/recurring", label: "Recurring" },
-  { href: "/settings", label: "Settings" },
-];
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarHeader,
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { SidebarNav } from "@/components/sidebar-nav";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  async function signOut() {
+    "use server";
+    const supabase = await supabaseServer();
+    await supabase.auth.signOut();
+    redirect("/login");
+  }
+
   return (
-    <div className="flex min-h-screen">
-      <aside className="w-60 border-r p-6">
-        <div className="mb-8 text-lg font-semibold">Invoicer</div>
-        <nav className="flex flex-col gap-1">
-          {nav.map((i) => (
-            <Link key={i.href} href={i.href} className="rounded px-3 py-2 text-sm hover:bg-accent">
-              {i.label}
-            </Link>
-          ))}
-        </nav>
-        <form
-          action={async () => {
-            "use server";
-            const supabase = await supabaseServer();
-            await supabase.auth.signOut();
-            redirect("/login");
-          }}
-          className="mt-8"
-        >
-          <Button variant="ghost" size="sm" type="submit">
-            Sign out
-          </Button>
-        </form>
-      </aside>
-      <main className="flex-1 p-8">{children}</main>
-    </div>
+    <SidebarProvider>
+      <Sidebar collapsible="icon">
+        <SidebarHeader>
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 px-2 py-1.5 text-sm font-semibold tracking-tight"
+          >
+            <div className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <Receipt className="size-4" />
+            </div>
+            <span className="group-data-[collapsible=icon]:hidden">Invoicer</span>
+          </Link>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarNav />
+          </SidebarGroup>
+        </SidebarContent>
+        <SidebarFooter className="gap-1">
+          <ThemeToggle />
+          <form action={signOut}>
+            <Button
+              type="submit"
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start gap-2"
+            >
+              <LogOut className="size-4" />
+              <span>Sign out</span>
+            </Button>
+          </form>
+        </SidebarFooter>
+      </Sidebar>
+      <SidebarInset>
+        <header className="sticky top-0 z-10 flex h-12 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur">
+          <SidebarTrigger className="-ml-1" />
+          <div className="h-4 w-px bg-border" />
+          <span className="text-sm text-muted-foreground">Invoicer</span>
+        </header>
+        <main className="flex-1">{children}</main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

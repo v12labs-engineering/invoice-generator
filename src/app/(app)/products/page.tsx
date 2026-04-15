@@ -1,8 +1,27 @@
+import { Package, Plus, Trash2 } from "lucide-react";
 import { listProducts, createProduct, archiveProduct } from "@/lib/actions/products";
 import { formatMoney } from "@/lib/money";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/page-header";
+import { EmptyState } from "@/components/empty-state";
+import { FormSubmitButton } from "@/components/form-submit-button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default async function ProductsPage() {
   const products = await listProducts();
@@ -19,65 +38,92 @@ export default async function ProductsPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-2xl font-semibold">Products & Services</h1>
+    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+      <PageHeader
+        title="Products & Services"
+        description="Reusable catalog items you can add to invoices."
+      />
 
-      <form action={add} className="max-w-md space-y-3 rounded-lg border p-6">
-        <div className="space-y-1">
-          <Label htmlFor="name">Name</Label>
-          <Input id="name" name="name" required />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="description">Description</Label>
-          <Input id="description" name="description" />
-        </div>
-        <div className="grid grid-cols-3 gap-3">
-          <div className="space-y-1">
-            <Label htmlFor="unitPrice">Unit price</Label>
-            <Input id="unitPrice" name="unitPrice" type="number" step="0.01" required />
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="currency">Currency</Label>
-            <Input id="currency" name="currency" defaultValue="USD" />
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="defaultTaxRate">Tax (bps)</Label>
-            <Input id="defaultTaxRate" name="defaultTaxRate" type="number" defaultValue={0} />
-          </div>
-        </div>
-        <Button type="submit">Add product</Button>
-      </form>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+        <Card>
+          <CardHeader>
+            <CardTitle>Add item</CardTitle>
+            <CardDescription>Save a product or service for reuse.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form action={add} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input id="name" name="name" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Input id="description" name="description" />
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="unitPrice">Unit price</Label>
+                  <Input id="unitPrice" name="unitPrice" type="number" step="0.01" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="currency">Currency</Label>
+                  <Input id="currency" name="currency" defaultValue="USD" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="defaultTaxRate">Tax (bps)</Label>
+                  <Input id="defaultTaxRate" name="defaultTaxRate" type="number" defaultValue={0} />
+                </div>
+              </div>
+              <FormSubmitButton>
+                <Plus className="size-4" />
+                Add item
+              </FormSubmitButton>
+            </form>
+          </CardContent>
+        </Card>
 
-      <div className="rounded-lg border">
-        <table className="w-full text-sm">
-          <thead className="border-b bg-muted/50 text-left">
-            <tr>
-              <th className="p-3">Name</th>
-              <th className="p-3">Price</th>
-              <th className="p-3"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((p) => (
-              <tr key={p.id} className="border-b last:border-0">
-                <td className="p-3">{p.name}</td>
-                <td className="p-3">{formatMoney(p.unitPrice, p.currency)}</td>
-                <td className="p-3 text-right">
-                  <form
-                    action={async () => {
-                      "use server";
-                      await archiveProduct(p.id);
-                    }}
-                  >
-                    <Button variant="ghost" size="sm" type="submit">
-                      Archive
-                    </Button>
-                  </form>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div>
+          {products.length === 0 ? (
+            <EmptyState
+              icon={Package}
+              title="No items yet"
+              description="Add reusable line items for faster invoicing."
+            />
+          ) : (
+            <div className="overflow-hidden rounded-lg border bg-card">
+              <Table>
+                <TableHeader className="bg-muted/40">
+                  <TableRow>
+                    <TableHead className="px-4">Name</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead className="w-24" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {products.map((p) => (
+                    <TableRow key={p.id}>
+                      <TableCell className="px-4 font-medium">{p.name}</TableCell>
+                      <TableCell>{formatMoney(p.unitPrice, p.currency)}</TableCell>
+                      <TableCell className="text-right">
+                        <form
+                          action={async () => {
+                            "use server";
+                            await archiveProduct(p.id);
+                          }}
+                        >
+                          <Button variant="ghost" size="sm" type="submit">
+                            <Trash2 className="size-3.5" />
+                            Archive
+                          </Button>
+                        </form>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

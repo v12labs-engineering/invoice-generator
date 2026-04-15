@@ -1,8 +1,9 @@
+import { redirect } from "next/navigation";
 import { listClients } from "@/lib/actions/clients";
 import { getBusinessProfile } from "@/lib/actions/settings";
 import { createInvoice } from "@/lib/actions/invoices";
 import { InvoiceForm } from "@/components/invoice-form";
-import { redirect } from "next/navigation";
+import { PageHeader } from "@/components/page-header";
 
 export default async function NewInvoicePage() {
   const [clients, profile] = await Promise.all([listClients(), getBusinessProfile()]);
@@ -24,8 +25,11 @@ export default async function NewInvoicePage() {
   }
 
   return (
-    <div className="max-w-4xl space-y-6">
-      <h1 className="text-2xl font-semibold">New Invoice</h1>
+    <div className="mx-auto max-w-5xl space-y-6 p-6 lg:p-8">
+      <PageHeader
+        title="New invoice"
+        description="Draft a new invoice. You can send it after saving."
+      />
       <InvoiceForm clients={clients} defaultCurrency={profile?.defaultCurrency ?? "USD"} onSubmit={submit} />
     </div>
   );

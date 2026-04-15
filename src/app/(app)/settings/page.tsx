@@ -1,8 +1,16 @@
 import { getBusinessProfile, upsertBusinessProfile } from "@/lib/actions/settings";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { PageHeader } from "@/components/page-header";
+import { FormSubmitButton } from "@/components/form-submit-button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default async function SettingsPage() {
   const profile = await getBusinessProfile();
@@ -27,50 +35,73 @@ export default async function SettingsPage() {
   }
 
   return (
-    <div className="max-w-2xl space-y-6">
-      <h1 className="text-2xl font-semibold">Settings</h1>
-      <form action={save} className="space-y-4">
-        <Field name="name" label="Business name" defaultValue={profile?.name} required />
-        <Field name="email" label="Email" type="email" defaultValue={profile?.email} required />
-        <Field name="phone" label="Phone" defaultValue={profile?.phone ?? ""} />
-        <div className="space-y-2">
-          <Label htmlFor="addressLines">Address (one line per row)</Label>
-          <Textarea
-            id="addressLines"
-            name="addressLines"
-            rows={3}
-            defaultValue={profile?.addressLines.join("\n") ?? ""}
-          />
+    <div className="mx-auto max-w-3xl space-y-6 p-6 lg:p-8">
+      <PageHeader
+        title="Settings"
+        description="Business information shown on invoices and used as defaults."
+      />
+      <form action={save} className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Business profile</CardTitle>
+            <CardDescription>Appears on every invoice you send.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Field name="name" label="Business name" defaultValue={profile?.name} required />
+            <Field name="email" label="Email" type="email" defaultValue={profile?.email} required />
+            <Field name="phone" label="Phone" defaultValue={profile?.phone ?? ""} />
+            <div className="space-y-2">
+              <Label htmlFor="addressLines">Address (one line per row)</Label>
+              <Textarea
+                id="addressLines"
+                name="addressLines"
+                rows={3}
+                defaultValue={profile?.addressLines.join("\n") ?? ""}
+              />
+            </div>
+            <Field name="taxId" label="Tax ID" defaultValue={profile?.taxId ?? ""} />
+            <div className="space-y-2">
+              <Label htmlFor="bankDetails">Bank details</Label>
+              <Textarea
+                id="bankDetails"
+                name="bankDetails"
+                rows={3}
+                defaultValue={profile?.bankDetails ?? ""}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Invoice defaults</CardTitle>
+            <CardDescription>Used when creating new invoices.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <Field
+                name="defaultCurrency"
+                label="Currency"
+                defaultValue={profile?.defaultCurrency ?? "USD"}
+              />
+              <Field
+                name="defaultTaxRate"
+                label="Tax rate (bps)"
+                type="number"
+                defaultValue={String(profile?.defaultTaxRate ?? 0)}
+              />
+              <Field
+                name="invoicePrefix"
+                label="Invoice prefix"
+                defaultValue={profile?.invoicePrefix ?? "INV-"}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex justify-end">
+          <FormSubmitButton>Save changes</FormSubmitButton>
         </div>
-        <Field name="taxId" label="Tax ID" defaultValue={profile?.taxId ?? ""} />
-        <div className="space-y-2">
-          <Label htmlFor="bankDetails">Bank details</Label>
-          <Textarea
-            id="bankDetails"
-            name="bankDetails"
-            rows={3}
-            defaultValue={profile?.bankDetails ?? ""}
-          />
-        </div>
-        <div className="grid grid-cols-3 gap-4">
-          <Field
-            name="defaultCurrency"
-            label="Currency"
-            defaultValue={profile?.defaultCurrency ?? "USD"}
-          />
-          <Field
-            name="defaultTaxRate"
-            label="Tax rate (basis points)"
-            type="number"
-            defaultValue={String(profile?.defaultTaxRate ?? 0)}
-          />
-          <Field
-            name="invoicePrefix"
-            label="Invoice prefix"
-            defaultValue={profile?.invoicePrefix ?? "INV-"}
-          />
-        </div>
-        <Button type="submit">Save</Button>
       </form>
     </div>
   );
