@@ -23,7 +23,7 @@ const roundHalfUp = (n: number): number => Math.floor(n + 0.5);
 
 export const calcLineTotal = (line: LineInput): LineTotals => {
   const subtotal = line.quantity * line.unitPrice;
-  const afterDiscount = subtotal - line.lineDiscount;
+  const afterDiscount = Math.max(0, subtotal - line.lineDiscount);
   const tax = roundHalfUp((afterDiscount * line.taxRate) / 10000);
   return {
     subtotal,
@@ -41,8 +41,8 @@ export const calcInvoiceTotals = (lines: LineInput[], globalDiscount: number): I
     lineDiscounts += line.lineDiscount;
   }
 
-  const preTaxTotal = subtotal - lineDiscounts - globalDiscount;
-  const discountedBase = subtotal - lineDiscounts;
+  const discountedBase = Math.max(0, subtotal - lineDiscounts);
+  const preTaxTotal = Math.max(0, discountedBase - globalDiscount);
   const scale = discountedBase > 0 ? preTaxTotal / discountedBase : 0;
 
   let taxAmount = 0;
@@ -51,9 +51,10 @@ export const calcInvoiceTotals = (lines: LineInput[], globalDiscount: number): I
     taxAmount += roundHalfUp((lineBase * line.taxRate) / 10000);
   }
 
+  const effectiveDiscount = subtotal - preTaxTotal;
   return {
     subtotal,
-    discountAmount: lineDiscounts + globalDiscount,
+    discountAmount: effectiveDiscount,
     taxAmount,
     total: preTaxTotal + taxAmount,
   };

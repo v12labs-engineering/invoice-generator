@@ -54,3 +54,46 @@ describe("formatMoney", () => {
     expect(formatMoney(1000, "EUR")).toMatch(/€/);
   });
 });
+
+describe("edge cases", () => {
+  it("clamps line discount that exceeds line subtotal to zero", () => {
+    expect(calcLineTotal({ quantity: 1, unitPrice: 1000, lineDiscount: 5000, taxRate: 1000 }))
+      .toEqual({ subtotal: 1000, discount: 5000, tax: 0, total: 0 });
+  });
+
+  it("returns zeros for empty line array", () => {
+    expect(calcInvoiceTotals([], 0))
+      .toEqual({ subtotal: 0, discountAmount: 0, taxAmount: 0, total: 0 });
+  });
+
+  it("clamps global discount that exceeds subtotal", () => {
+    const lines = [{ quantity: 1, unitPrice: 1000, lineDiscount: 0, taxRate: 1000 }];
+    const result = calcInvoiceTotals(lines, 5000);
+    expect(result.subtotal).toBe(1000);
+    expect(result.discountAmount).toBe(1000);
+    expect(result.taxAmount).toBe(0);
+    expect(result.total).toBe(0);
+  });
+
+  it("100% global discount yields zero tax and total", () => {
+    const lines = [{ quantity: 2, unitPrice: 5000, lineDiscount: 0, taxRate: 2000 }];
+    const result = calcInvoiceTotals(lines, 10000);
+    expect(result.total).toBe(0);
+    expect(result.taxAmount).toBe(0);
+  });
+
+  it("scales tax proportionally across mixed-rate lines under global discount", () => {
+    const lines = [
+      { quantity: 1, unitPrice: 10000, lineDiscount: 0, taxRate: 1000 }, // 10%
+      { quantity: 1, unitPrice: 10000, lineDiscount: 0, taxRate: 2000 }, // 20%
+    ];
+    // discountedBase = 20000, globalDiscount = 4000 → preTax = 16000, scale = 0.8
+    // Line 1: 10000 * 0.8 = 8000 base * 10% = 800
+    // Line 2: 10000 * 0.8 = 8000 base * 20% = 1600
+    const result = calcInvoiceTotals(lines, 4000);
+    expect(result.subtotal).toBe(20000);
+    expect(result.discountAmount).toBe(4000);
+    expect(result.taxAmount).toBe(2400);
+    expect(result.total).toBe(18400);
+  });
+});
