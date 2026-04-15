@@ -26,16 +26,30 @@ export default async function NewInvoicePage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-6 lg:p-8">
+    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
       <PageHeader
         title="New invoice"
         description="Draft a new invoice. You can send it after saving."
       />
       <InvoiceForm
-        clients={clients}
+        clients={clients.map((c) => ({
+          id: c.id,
+          name: c.name,
+          email: c.email,
+          addressLines: c.addressLines,
+          taxId: c.taxId,
+        }))}
         defaultCurrency={profile?.defaultCurrency ?? "USD"}
         logoUrl={profile?.logoUrl ?? null}
         defaultTemplate={profile?.defaultTemplate ?? "CLASSIC"}
+        business={{
+          name: profile?.name ?? "Your business",
+          addressLines: profile?.addressLines ?? [],
+          email: profile?.email ?? "",
+          phone: profile?.phone ?? null,
+          taxId: profile?.taxId ?? null,
+          bankDetails: profile?.bankDetails ?? null,
+        }}
         onSubmit={submit}
       />
     </div>

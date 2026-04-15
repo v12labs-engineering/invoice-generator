@@ -8,7 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { uploadLogo, removeLogo } from "@/lib/actions/logo";
 
-export function LogoUpload({ initialUrl }: { initialUrl: string | null }) {
+export function LogoUpload({
+  initialUrl,
+  onChange,
+}: {
+  initialUrl: string | null;
+  onChange?: (url: string | null) => void;
+}) {
   const [url, setUrl] = useState(initialUrl);
   const [pending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -20,6 +26,7 @@ export function LogoUpload({ initialUrl }: { initialUrl: string | null }) {
       const res = await uploadLogo(fd);
       if (res.ok) {
         setUrl(res.data.url);
+        onChange?.(res.data.url);
         toast.success("Logo uploaded");
       } else {
         toast.error(res.error);
@@ -33,6 +40,7 @@ export function LogoUpload({ initialUrl }: { initialUrl: string | null }) {
       const res = await removeLogo();
       if (res.ok) {
         setUrl(null);
+        onChange?.(null);
         toast.success("Logo removed");
       } else {
         toast.error(res.error);
