@@ -69,7 +69,7 @@ model BusinessProfile {
   defaultTaxRate    Int      @default(0)
   invoicePrefix     String   @default("INV-")
   nextInvoiceNumber Int      @default(1)
-  updatedAt         DateTime @updatedAt
+  updatedAt         DateTime @default(now()) @updatedAt
 }
 
 model Client {
@@ -85,7 +85,7 @@ model Client {
   invoices     Invoice[]
   schedules    RecurringSchedule[]
   createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  updatedAt    DateTime  @default(now()) @updatedAt
   @@index([userId])
 }
 
@@ -100,7 +100,7 @@ model Product {
   defaultTaxRate Int      @default(0)
   archivedAt     DateTime?
   createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  updatedAt      DateTime @default(now()) @updatedAt
   @@index([userId])
 }
 
@@ -138,7 +138,7 @@ model Invoice {
   lines               InvoiceLine[]
   payments            Payment[]
   createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
+  updatedAt           DateTime      @default(now()) @updatedAt
   @@unique([userId, number])
   @@index([userId, status])
   @@index([userId, issueDate])
@@ -171,7 +171,7 @@ model Payment {
   reference String?
   note      String?
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
   @@index([invoiceId])
 }
 

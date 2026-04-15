@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { signOut } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { supabaseServer } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 
 const nav = [
@@ -26,7 +27,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <form
           action={async () => {
             "use server";
-            await signOut({ redirectTo: "/login" });
+            const supabase = await supabaseServer();
+            await supabase.auth.signOut();
+            redirect("/login");
           }}
           className="mt-8"
         >

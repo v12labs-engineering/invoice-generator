@@ -1,11 +1,9 @@
 import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
+import { requireUserId } from "@/lib/actions/_shared";
 import { formatMoney } from "@/lib/money";
 
 export default async function DashboardPage() {
-  const session = await auth();
-  if (!session?.user?.id) return null;
-  const userId = session.user.id;
+  const userId = await requireUserId();
 
   const [outstanding, paidThisMonth, overdue, profile] = await Promise.all([
     db.invoice.aggregate({
