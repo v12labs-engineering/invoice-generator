@@ -12,14 +12,14 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   }
 
   const { id } = await params;
-  const data = await buildPdfData(id, userId);
-  if (!data) return new Response("Not found", { status: 404 });
+  const built = await buildPdfData(id, userId);
+  if (!built) return new Response("Not found", { status: 404 });
 
-  const pdf = await renderInvoicePdf(data);
+  const pdf = await renderInvoicePdf(built.data, built.template);
   return new Response(pdf as unknown as BodyInit, {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `inline; filename="${data.number}.pdf"`,
+      "Content-Disposition": `inline; filename="${built.data.number}.pdf"`,
     },
   });
 }

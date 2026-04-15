@@ -69,6 +69,7 @@ model BusinessProfile {
   defaultTaxRate    Int      @default(0)
   invoicePrefix     String   @default("INV-")
   nextInvoiceNumber Int      @default(1)
+  defaultTemplate   InvoiceTemplate @default(CLASSIC)
   updatedAt         DateTime @default(now()) @updatedAt
 }
 
@@ -112,6 +113,12 @@ enum InvoiceStatus {
   VOID
 }
 
+enum InvoiceTemplate {
+  CLASSIC
+  MODERN
+  MINIMAL
+}
+
 model Invoice {
   id                  String        @id @default(cuid())
   userId              String
@@ -131,6 +138,7 @@ model Invoice {
   balance             Int
   notes               String?
   terms               String?
+  template            InvoiceTemplate?
   pdfUrl              String?
   sentAt              DateTime?
   recurringScheduleId String?

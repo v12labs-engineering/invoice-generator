@@ -18,6 +18,7 @@ export default async function NewInvoicePage() {
       currency: formData.get("currency"),
       notes: formData.get("notes"),
       terms: formData.get("terms"),
+      template: formData.get("template"),
       globalDiscount: 0,
       lines,
     });
@@ -34,6 +35,7 @@ export default async function NewInvoicePage() {
         clients={clients}
         defaultCurrency={profile?.defaultCurrency ?? "USD"}
         logoUrl={profile?.logoUrl ?? null}
+        defaultTemplate={profile?.defaultTemplate ?? "CLASSIC"}
         onSubmit={submit}
       />
     </div>

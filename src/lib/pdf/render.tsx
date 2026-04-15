@@ -1,8 +1,14 @@
 import { renderToBuffer } from "@react-pdf/renderer";
-import { InvoiceDocument, type InvoicePdfData } from "./invoice-template";
+import { renderTemplate, type InvoicePdfData } from "./templates";
+import type { InvoiceTemplate } from "@prisma/client";
 import { db } from "@/lib/db";
 
-export async function buildPdfData(invoiceId: string, userId: string): Promise<InvoicePdfData | null> {
+export type { InvoicePdfData } from "./templates";
+
+export async function buildPdfData(
+  invoiceId: string,
+  userId: string,
+): Promise<{ data: InvoicePdfData; template: InvoiceTemplate } | null> {
   const invoice = await db.invoice.findFirst({
     where: { id: invoiceId, userId },
     include: { client: true, lines: { orderBy: { sortOrder: "asc" } } },
@@ -11,7 +17,7 @@ export async function buildPdfData(invoiceId: string, userId: string): Promise<I
 
   const profile = await db.businessProfile.findUniqueOrThrow({ where: { userId } });
 
-  return {
+  const data: InvoicePdfData = {
     number: invoice.number ?? "DRAFT",
     issueDate: invoice.issueDate.toISOString().slice(0, 10),
     dueDate: invoice.dueDate.toISOString().slice(0, 10),
@@ -44,8 +50,14 @@ export async function buildPdfData(invoiceId: string, userId: string): Promise<I
       lineTotal: l.lineTotal,
     })),
   };
+
+  const template = invoice.template ?? profile.defaultTemplate ?? "CLASSIC";
+  return { data, template };
 }
 
-export async function renderInvoicePdf(data: InvoicePdfData): Promise<Buffer> {
-  return renderToBuffer(<InvoiceDocument data={data} />);
+export async function renderInvoicePdf(
+  data: InvoicePdfData,
+  template: InvoiceTemplate = "CLASSIC",
+): Promise<Buffer> {
+  return renderToBuffer(renderTemplate(template, data));
 }

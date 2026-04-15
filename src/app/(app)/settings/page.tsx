@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PageHeader } from "@/components/page-header";
 import { FormSubmitButton } from "@/components/form-submit-button";
+import { TemplatePicker } from "@/components/template-picker";
 import {
   Card,
   CardContent,
@@ -26,6 +27,7 @@ export default async function SettingsPage() {
       defaultCurrency: formData.get("defaultCurrency"),
       defaultTaxRate: Number(formData.get("defaultTaxRate")),
       invoicePrefix: formData.get("invoicePrefix"),
+      defaultTemplate: formData.get("defaultTemplate"),
       addressLines: String(formData.get("addressLines") ?? "")
         .split("\n")
         .map((s) => s.trim())
@@ -96,6 +98,16 @@ export default async function SettingsPage() {
                 defaultValue={profile?.invoicePrefix ?? "INV-"}
               />
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Default template</CardTitle>
+            <CardDescription>Used for new invoices. You can override per invoice.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TemplatePicker name="defaultTemplate" defaultValue={profile?.defaultTemplate ?? "CLASSIC"} />
           </CardContent>
         </Card>
 

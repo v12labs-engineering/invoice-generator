@@ -69,6 +69,7 @@ export async function createInvoice(input: unknown): Promise<Result<{ id: string
         currency: parsed.data.currency,
         notes: parsed.data.notes || null,
         terms: parsed.data.terms || null,
+        template: parsed.data.template ?? null,
         subtotal,
         discountAmount,
         taxAmount,
@@ -110,6 +111,7 @@ export async function updateDraftInvoice(id: string, input: unknown): Promise<Re
           currency: parsed.data.currency,
           notes: parsed.data.notes || null,
           terms: parsed.data.terms || null,
+          template: parsed.data.template ?? null,
           subtotal,
           discountAmount,
           taxAmount,
@@ -161,9 +163,10 @@ export async function sendInvoice(
     }
 
     // Render PDF
-    const pdfData = await buildPdfData(id, userId);
-    if (!pdfData) return err("Failed to build PDF data");
-    const pdfBuffer = await renderInvoicePdf(pdfData);
+    const built = await buildPdfData(id, userId);
+    if (!built) return err("Failed to build PDF data");
+    const pdfData = built.data;
+    const pdfBuffer = await renderInvoicePdf(built.data, built.template);
 
     // Upload to Vercel Blob
     if (!process.env.BLOB_READ_WRITE_TOKEN) {

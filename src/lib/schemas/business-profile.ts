@@ -10,6 +10,7 @@ export const BusinessProfileInput = z.object({
   defaultCurrency: z.string().length(3),
   defaultTaxRate: z.number().int().min(0).max(10000),
   invoicePrefix: z.string().default("INV-"),
+  defaultTemplate: z.enum(["CLASSIC", "MODERN", "MINIMAL"]).default("CLASSIC"),
 });
 
 export type BusinessProfileInput = z.infer<typeof BusinessProfileInput>;

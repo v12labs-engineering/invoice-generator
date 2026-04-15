@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/table";
 import { FormSubmitButton } from "@/components/form-submit-button";
 import { LogoUpload } from "@/components/logo-upload";
+import { TemplatePicker } from "@/components/template-picker";
 import { calcInvoiceTotals, formatMoney } from "@/lib/money";
 
 type Line = {
@@ -37,15 +38,19 @@ type Line = {
 const selectClass =
   "flex h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30";
 
+type TemplateId = "CLASSIC" | "MODERN" | "MINIMAL";
+
 export function InvoiceForm({
   clients,
   defaultCurrency,
   logoUrl,
+  defaultTemplate,
   onSubmit,
 }: {
   clients: { id: string; name: string }[];
   defaultCurrency: string;
   logoUrl: string | null;
+  defaultTemplate: TemplateId;
   onSubmit: (fd: FormData) => Promise<void>;
 }) {
   const [lines, setLines] = useState<Line[]>([
@@ -72,6 +77,16 @@ export function InvoiceForm({
         </CardHeader>
         <CardContent>
           <LogoUpload initialUrl={logoUrl} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Template</CardTitle>
+          <CardDescription>Pick the layout for this invoice&apos;s PDF.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <TemplatePicker defaultValue={defaultTemplate} />
         </CardContent>
       </Card>
 

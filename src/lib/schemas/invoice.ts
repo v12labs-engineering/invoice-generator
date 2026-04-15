@@ -18,6 +18,7 @@ export const InvoiceInput = z.object({
   notes: z.string().optional().or(z.literal("")),
   terms: z.string().optional().or(z.literal("")),
   globalDiscount: z.number().int().nonnegative().default(0),
+  template: z.enum(["CLASSIC", "MODERN", "MINIMAL"]).optional(),
   lines: z.array(InvoiceLineInput).min(1, "At least one line required"),
 });
 
