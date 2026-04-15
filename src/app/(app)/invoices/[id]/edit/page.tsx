@@ -35,7 +35,7 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
       <PageHeader
-        title={`Edit ${invoice.number ?? "(draft)"}`}
+        title={`Edit ${invoice.number ?? ""}`}
         description="Update the draft before finalizing."
       />
       <InvoiceForm

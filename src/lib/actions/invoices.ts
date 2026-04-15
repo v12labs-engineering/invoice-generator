@@ -60,9 +60,11 @@ export async function createInvoice(input: unknown): Promise<Result<{ id: string
   );
 
   try {
+    const number = await assignInvoiceNumber(userId);
     const inv = await db.invoice.create({
       data: {
         userId,
+        number,
         clientId: parsed.data.clientId,
         issueDate: parsed.data.issueDate,
         dueDate: parsed.data.dueDate,
@@ -82,6 +84,21 @@ export async function createInvoice(input: unknown): Promise<Result<{ id: string
     return ok({ id: inv.id });
   } catch {
     return err("Failed to create invoice");
+  }
+}
+
+export async function deleteDraftInvoice(id: string): Promise<Result<null>> {
+  const userId = await requireUserId();
+  const existing = await db.invoice.findFirst({ where: { id, userId } });
+  if (!existing) return err("Not found");
+  if (existing.status !== "DRAFT") return err("Only drafts can be deleted");
+
+  try {
+    await db.invoice.delete({ where: { id } });
+    revalidatePath("/invoices");
+    return ok(null);
+  } catch {
+    return err("Failed to delete invoice");
   }
 }
 

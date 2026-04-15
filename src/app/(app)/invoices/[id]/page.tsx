@@ -1,6 +1,12 @@
-import { notFound } from "next/navigation";
-import { Ban, CheckCircle2, Download, Pencil, Receipt, Send } from "lucide-react";
-import { finalizeInvoice, getInvoice, sendInvoice, voidInvoice } from "@/lib/actions/invoices";
+import { notFound, redirect } from "next/navigation";
+import { Ban, CheckCircle2, Download, Pencil, Receipt, Send, Trash2 } from "lucide-react";
+import {
+  deleteDraftInvoice,
+  finalizeInvoice,
+  getInvoice,
+  sendInvoice,
+  voidInvoice,
+} from "@/lib/actions/invoices";
 import { recordPayment } from "@/lib/actions/payments";
 import { formatMoney } from "@/lib/money";
 import { effectiveStatus, StatusBadge } from "@/components/status-badge";
@@ -44,6 +50,11 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     "use server";
     await finalizeInvoice(id);
   }
+  async function deleteDraft() {
+    "use server";
+    const res = await deleteDraftInvoice(id);
+    if (res.ok) redirect("/invoices");
+  }
 
   const status = effectiveStatus(invoice);
   const isDraft = invoice.status === "DRAFT";
@@ -55,7 +66,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
       <PageHeader
-        title={invoice.number ?? "(draft)"}
+        title={invoice.number ?? ""}
         description={invoice.client.name}
         actions={<StatusBadge status={status} />}
       />
@@ -220,7 +231,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                 <Download className="size-4" />
                 Download PDF
               </Button>
-              {canVoid && (
+              {canVoid && !isDraft && (
                 <form action={voidIt}>
                   <Button
                     variant="destructive"
@@ -229,6 +240,18 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                   >
                     <Ban className="size-4" />
                     Void invoice
+                  </Button>
+                </form>
+              )}
+              {isDraft && (
+                <form action={deleteDraft}>
+                  <Button
+                    variant="destructive"
+                    type="submit"
+                    className="w-full justify-start"
+                  >
+                    <Trash2 className="size-4" />
+                    Delete draft
                   </Button>
                 </form>
               )}

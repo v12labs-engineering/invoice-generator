@@ -63,7 +63,7 @@ export default async function InvoicesPage() {
                       href={`/invoices/${inv.id}`}
                       className="hover:underline"
                     >
-                      {inv.number ?? "(draft)"}
+                      {inv.number}
                     </Link>
                   </TableCell>
                   <TableCell>{inv.client.name}</TableCell>
