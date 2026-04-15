@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const PaymentInput = z.object({
-  invoiceId: z.string(),
+  invoiceId: z.string().min(1),
   amount: z.number().int().positive(),
   paidAt: z.coerce.date(),
   method: z.enum(["bank", "card", "cash", "other"]),

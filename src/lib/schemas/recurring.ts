@@ -2,7 +2,7 @@ import { z } from "zod";
 import { InvoiceLineInput } from "./invoice";
 
 export const RecurringInput = z.object({
-  clientId: z.string(),
+  clientId: z.string().min(1),
   cadence: z.enum(["WEEKLY", "MONTHLY", "QUARTERLY", "YEARLY"]),
   intervalCount: z.number().int().positive().default(1),
   startDate: z.coerce.date(),
