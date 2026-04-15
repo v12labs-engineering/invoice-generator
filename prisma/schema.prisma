@@ -15,6 +15,10 @@ model User {
   accounts      Account[]
   sessions      Session[]
   profile       BusinessProfile?
+  clients       Client[]
+  products      Product[]
+  invoices      Invoice[]
+  schedules     RecurringSchedule[]
   createdAt     DateTime  @default(now())
 }
 
@@ -71,6 +75,7 @@ model BusinessProfile {
 model Client {
   id           String    @id @default(cuid())
   userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   name         String
   email        String?
   addressLines String[]
@@ -80,12 +85,14 @@ model Client {
   invoices     Invoice[]
   schedules    RecurringSchedule[]
   createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
   @@index([userId])
 }
 
 model Product {
   id             String   @id @default(cuid())
   userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   name           String
   description    String?
   unitPrice      Int
@@ -93,6 +100,7 @@ model Product {
   defaultTaxRate Int      @default(0)
   archivedAt     DateTime?
   createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
   @@index([userId])
 }
 
@@ -107,7 +115,8 @@ enum InvoiceStatus {
 model Invoice {
   id                  String        @id @default(cuid())
   userId              String
-  number              String?       @unique
+  user                User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  number              String?
   clientId            String
   client              Client        @relation(fields: [clientId], references: [id])
   issueDate           DateTime
@@ -125,12 +134,16 @@ model Invoice {
   pdfUrl              String?
   sentAt              DateTime?
   recurringScheduleId String?
+  schedule            RecurringSchedule? @relation(fields: [recurringScheduleId], references: [id], onDelete: SetNull)
   lines               InvoiceLine[]
   payments            Payment[]
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
+  @@unique([userId, number])
   @@index([userId, status])
   @@index([userId, issueDate])
+  @@index([userId, clientId])
+  @@index([userId, status, dueDate])
 }
 
 model InvoiceLine {
@@ -145,6 +158,7 @@ model InvoiceLine {
   taxRate      Int     @default(0)
   lineTotal    Int
   sortOrder    Int
+  @@index([invoiceId])
 }
 
 model Payment {
@@ -157,6 +171,8 @@ model Payment {
   reference String?
   note      String?
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([invoiceId])
 }
 
 enum Cadence {
@@ -169,6 +185,7 @@ enum Cadence {
 model RecurringSchedule {
   id            String    @id @default(cuid())
   userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   clientId      String
   client        Client    @relation(fields: [clientId], references: [id])
   templateJson  Json
@@ -180,6 +197,8 @@ model RecurringSchedule {
   lastRunAt     DateTime?
   autoSend      Boolean   @default(false)
   active        Boolean   @default(true)
+  invoices      Invoice[]
   createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   @@index([userId, active, nextRunAt])
 }
