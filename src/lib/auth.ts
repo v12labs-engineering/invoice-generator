@@ -20,7 +20,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return user.email.toLowerCase() === allowed;
     },
     async session({ session, user }) {
-      if (session.user && user?.id) (session.user as { id?: string }).id = user.id;
+      if (session.user && user?.id) session.user.id = user.id;
       return session;
     },
   },

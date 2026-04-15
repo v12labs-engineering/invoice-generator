@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
 export default auth((req) => {
@@ -8,11 +9,10 @@ export default auth((req) => {
   if (path.startsWith("/api/cron")) return;
 
   if (!req.auth) {
-    const url = new URL("/login", req.nextUrl.origin);
-    return Response.redirect(url);
+    return NextResponse.redirect(new URL("/login", req.nextUrl));
   }
 });
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/|favicon.ico|.*\\.(?:png|jpg|jpeg|svg|ico|webp|txt|xml)$).*)"],
 };
