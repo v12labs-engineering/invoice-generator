@@ -1,4 +1,5 @@
-import { Pause, Play, Repeat } from "lucide-react";
+import Link from "next/link";
+import { Pause, Play, Plus, Repeat } from "lucide-react";
 import { listSchedules, toggleSchedule } from "@/lib/actions/recurring";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,13 +22,25 @@ export default async function RecurringPage() {
       <PageHeader
         title="Recurring invoices"
         description="Schedules that automatically generate invoices on a cadence."
+        actions={
+          <Button render={<Link href="/recurring/new" />}>
+            <Plus className="size-4" />
+            New schedule
+          </Button>
+        }
       />
 
       {schedules.length === 0 ? (
         <EmptyState
           icon={Repeat}
           title="No recurring schedules"
-          description="Create schedules via the API. A UI creator is coming soon."
+          description="Create a schedule to auto-generate invoices on a cadence."
+          action={
+            <Button render={<Link href="/recurring/new" />}>
+              <Plus className="size-4" />
+              New schedule
+            </Button>
+          }
         />
       ) : (
         <div className="overflow-hidden rounded-lg border bg-card">

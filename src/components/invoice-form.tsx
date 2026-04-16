@@ -25,7 +25,12 @@ import {
 import { FormSubmitButton } from "@/components/form-submit-button";
 import { LogoUpload } from "@/components/logo-upload";
 import { TemplatePicker } from "@/components/template-picker";
-import { InvoicePreview } from "@/components/invoice-preview";
+import dynamic from "next/dynamic";
+
+const InvoicePreview = dynamic(
+  () => import("@/components/invoice-preview").then((m) => m.InvoicePreview),
+  { ssr: false, loading: () => null },
+);
 import { calcInvoiceTotals, calcLineTotal, formatMoney } from "@/lib/money";
 
 type Line = {
