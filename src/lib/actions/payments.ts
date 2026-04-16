@@ -4,15 +4,15 @@ import { db } from "@/lib/db";
 import { PaymentInput } from "@/lib/schemas/payment";
 import { err, ok, type Result } from "@/lib/result";
 import { revalidatePath } from "next/cache";
-import { requireUserId } from "./_shared";
+import { requireMembership } from "./_shared";
 
 export async function recordPayment(input: unknown): Promise<Result<null>> {
-  const userId = await requireUserId();
+  const { businessId } = await requireMembership();
   const parsed = PaymentInput.safeParse(input);
   if (!parsed.success) return err(parsed.error.issues[0]?.message ?? "Invalid input");
 
   const invoice = await db.invoice.findFirst({
-    where: { id: parsed.data.invoiceId, userId },
+    where: { id: parsed.data.invoiceId, businessId },
   });
   if (!invoice) return err("Invoice not found");
   if (invoice.status === "VOID") return err("Cannot pay voided invoice");

@@ -2,7 +2,7 @@ import { AlertCircle, CircleDollarSign, TrendingUp } from "lucide-react";
 import type { ComponentType } from "react";
 import type { LucideProps } from "lucide-react";
 import { db } from "@/lib/db";
-import { requireUserId } from "@/lib/actions/_shared";
+import { requireMembership } from "@/lib/actions/_shared";
 import { formatMoney } from "@/lib/money";
 import { PageHeader } from "@/components/page-header";
 import {
@@ -15,27 +15,27 @@ import {
 } from "@/components/ui/card";
 
 export default async function DashboardPage() {
-  const userId = await requireUserId();
+  const { businessId } = await requireMembership();
 
-  const [outstanding, paidThisMonth, overdue, profile] = await Promise.all([
+  const [outstanding, paidThisMonth, overdue, business] = await Promise.all([
     db.invoice.aggregate({
-      where: { userId, status: { in: ["SENT", "PARTIAL"] } },
+      where: { businessId, status: { in: ["SENT", "PARTIAL"] } },
       _sum: { balance: true },
     }),
     db.payment.aggregate({
       where: {
-        invoice: { userId },
+        invoice: { businessId },
         paidAt: { gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) },
       },
       _sum: { amount: true },
     }),
     db.invoice.count({
-      where: { userId, status: { in: ["SENT", "PARTIAL"] }, dueDate: { lt: new Date() } },
+      where: { businessId, status: { in: ["SENT", "PARTIAL"] }, dueDate: { lt: new Date() } },
     }),
-    db.businessProfile.findUnique({ where: { userId } }),
+    db.business.findUnique({ where: { id: businessId } }),
   ]);
 
-  const currency = profile?.defaultCurrency ?? "USD";
+  const currency = business?.defaultCurrency ?? "USD";
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">

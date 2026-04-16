@@ -7,15 +7,15 @@ export type { InvoicePdfData } from "./templates";
 
 export async function buildPdfData(
   invoiceId: string,
-  userId: string,
+  businessId: string,
 ): Promise<{ data: InvoicePdfData; template: InvoiceTemplate } | null> {
   const invoice = await db.invoice.findFirst({
-    where: { id: invoiceId, userId },
+    where: { id: invoiceId, businessId },
     include: { client: true, lines: { orderBy: { sortOrder: "asc" } } },
   });
   if (!invoice) return null;
 
-  const profile = await db.businessProfile.findUniqueOrThrow({ where: { userId } });
+  const business = await db.business.findUniqueOrThrow({ where: { id: businessId } });
 
   const data: InvoicePdfData = {
     number: invoice.number ?? "DRAFT",
@@ -29,13 +29,13 @@ export async function buildPdfData(
     notes: invoice.notes,
     terms: invoice.terms,
     business: {
-      name: profile.name,
-      addressLines: profile.addressLines,
-      email: profile.email,
-      phone: profile.phone,
-      taxId: profile.taxId,
-      bankDetails: profile.bankDetails,
-      logoUrl: profile.logoUrl,
+      name: business.name,
+      addressLines: business.addressLines,
+      email: business.email,
+      phone: business.phone,
+      taxId: business.taxId,
+      bankDetails: business.bankDetails,
+      logoUrl: business.logoUrl,
     },
     client: {
       name: invoice.client.name,
@@ -51,7 +51,7 @@ export async function buildPdfData(
     })),
   };
 
-  const template = invoice.template ?? profile.defaultTemplate ?? "CLASSIC";
+  const template = invoice.template ?? business.defaultTemplate ?? "CLASSIC";
   return { data, template };
 }
 

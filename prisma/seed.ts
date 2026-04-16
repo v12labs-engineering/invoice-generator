@@ -14,27 +14,33 @@ async function main() {
     create: { email: EMAIL, name: "Sharath" },
   });
 
-  await db.businessProfile.upsert({
-    where: { userId: user.id },
-    update: {},
-    create: {
-      userId: user.id,
-      name: "V12 Labs",
-      email: EMAIL,
-      addressLines: ["123 Example St", "San Francisco, CA 94102"],
-      defaultCurrency: "USD",
-      defaultTaxRate: 0,
-      invoicePrefix: "INV-",
-      nextInvoiceNumber: 1,
-    },
+  // One business per seeded user, with the user as OWNER
+  let business = await db.business.findFirst({
+    where: { memberships: { some: { userId: user.id, role: "OWNER" } } },
   });
+  if (!business) {
+    business = await db.business.create({
+      data: {
+        name: "V12 Labs",
+        email: EMAIL,
+        addressLines: ["123 Example St", "San Francisco, CA 94102"],
+        defaultCurrency: "USD",
+        defaultTaxRate: 0,
+        invoicePrefix: "INV-",
+        nextInvoiceNumber: 1,
+        memberships: {
+          create: { userId: user.id, role: "OWNER" },
+        },
+      },
+    });
+  }
 
   await db.client.upsert({
     where: { id: "seed-client-acme" },
     update: {},
     create: {
       id: "seed-client-acme",
-      userId: user.id,
+      businessId: business.id,
       name: "Acme Corp",
       email: "billing@acme.example",
       addressLines: ["500 Market St", "San Francisco, CA 94105"],
@@ -46,7 +52,7 @@ async function main() {
     update: {},
     create: {
       id: "seed-product-consulting",
-      userId: user.id,
+      businessId: business.id,
       name: "Consulting hour",
       description: "Senior engineering consulting",
       unitPrice: 20000,

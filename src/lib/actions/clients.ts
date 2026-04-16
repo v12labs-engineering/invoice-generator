@@ -4,24 +4,24 @@ import { db } from "@/lib/db";
 import { ClientInput } from "@/lib/schemas/client";
 import { err, ok, type Result } from "@/lib/result";
 import { revalidatePath } from "next/cache";
-import { requireUserId } from "./_shared";
+import { requireMembership } from "./_shared";
 
 export async function listClients() {
-  const userId = await requireUserId();
+  const { businessId } = await requireMembership();
   return db.client.findMany({
-    where: { userId, archivedAt: null },
+    where: { businessId, archivedAt: null },
     orderBy: { name: "asc" },
   });
 }
 
 export async function createClient(input: unknown): Promise<Result<{ id: string }>> {
-  const userId = await requireUserId();
+  const { businessId } = await requireMembership();
   const parsed = ClientInput.safeParse(input);
   if (!parsed.success) return err(parsed.error.issues[0]?.message ?? "Invalid input");
 
   try {
     const client = await db.client.create({
-      data: { ...parsed.data, userId, email: parsed.data.email || null },
+      data: { ...parsed.data, businessId, email: parsed.data.email || null },
     });
     revalidatePath("/clients");
     return ok({ id: client.id });
@@ -31,13 +31,13 @@ export async function createClient(input: unknown): Promise<Result<{ id: string 
 }
 
 export async function updateClient(id: string, input: unknown): Promise<Result<null>> {
-  const userId = await requireUserId();
+  const { businessId } = await requireMembership();
   const parsed = ClientInput.safeParse(input);
   if (!parsed.success) return err(parsed.error.issues[0]?.message ?? "Invalid input");
 
   try {
     const result = await db.client.updateMany({
-      where: { id, userId },
+      where: { id, businessId },
       data: { ...parsed.data, email: parsed.data.email || null },
     });
     if (result.count === 0) return err("Not found");
@@ -49,10 +49,10 @@ export async function updateClient(id: string, input: unknown): Promise<Result<n
 }
 
 export async function archiveClient(id: string): Promise<Result<null>> {
-  const userId = await requireUserId();
+  const { businessId } = await requireMembership();
   try {
     const result = await db.client.updateMany({
-      where: { id, userId },
+      where: { id, businessId },
       data: { archivedAt: new Date() },
     });
     if (result.count === 0) return err("Not found");

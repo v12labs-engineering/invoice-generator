@@ -4,26 +4,26 @@ import { db } from "@/lib/db";
 import { RecurringInput } from "@/lib/schemas/recurring";
 import { err, ok, type Result } from "@/lib/result";
 import { revalidatePath } from "next/cache";
-import { requireUserId } from "./_shared";
+import { requireMembership } from "./_shared";
 
 export async function listSchedules() {
-  const userId = await requireUserId();
+  const { businessId } = await requireMembership();
   return db.recurringSchedule.findMany({
-    where: { userId },
+    where: { businessId },
     include: { client: true },
     orderBy: { nextRunAt: "asc" },
   });
 }
 
 export async function createSchedule(input: unknown): Promise<Result<{ id: string }>> {
-  const userId = await requireUserId();
+  const { businessId } = await requireMembership();
   const parsed = RecurringInput.safeParse(input);
   if (!parsed.success) return err(parsed.error.issues[0]?.message ?? "Invalid input");
 
   try {
     const sched = await db.recurringSchedule.create({
       data: {
-        userId,
+        businessId,
         clientId: parsed.data.clientId,
         cadence: parsed.data.cadence,
         intervalCount: parsed.data.intervalCount,
@@ -47,9 +47,9 @@ export async function createSchedule(input: unknown): Promise<Result<{ id: strin
 }
 
 export async function toggleSchedule(id: string, active: boolean): Promise<Result<null>> {
-  const userId = await requireUserId();
+  const { businessId } = await requireMembership();
   const result = await db.recurringSchedule.updateMany({
-    where: { id, userId },
+    where: { id, businessId },
     data: { active },
   });
   if (result.count === 0) return err("Not found");

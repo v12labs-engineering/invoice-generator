@@ -3,25 +3,26 @@ import { assignInvoiceNumber } from "@/lib/invoice-number";
 import { db } from "@/lib/db";
 
 describe("assignInvoiceNumber", () => {
-  let userId: string;
+  let businessId: string;
 
   beforeEach(async () => {
     // Clean in dependency order
     await db.invoice.deleteMany();
-    await db.businessProfile.deleteMany();
+    await db.membership.deleteMany();
+    await db.business.deleteMany();
     await db.user.deleteMany();
     const user = await db.user.create({ data: { email: `t${Date.now()}@t.com` } });
-    userId = user.id;
-    await db.businessProfile.create({
+    const business = await db.business.create({
       data: {
-        userId,
         name: "Biz",
         email: "biz@x.com",
         invoicePrefix: "INV-",
         nextInvoiceNumber: 7,
         defaultCurrency: "USD",
+        memberships: { create: { userId: user.id, role: "OWNER" } },
       },
     });
+    businessId = business.id;
   });
 
   afterAll(async () => {
@@ -29,14 +30,14 @@ describe("assignInvoiceNumber", () => {
   });
 
   it("returns formatted number and increments counter", async () => {
-    const num = await assignInvoiceNumber(userId);
+    const num = await assignInvoiceNumber(businessId);
     expect(num).toBe("INV-0007");
-    const profile = await db.businessProfile.findUnique({ where: { userId } });
-    expect(profile?.nextInvoiceNumber).toBe(8);
+    const business = await db.business.findUnique({ where: { id: businessId } });
+    expect(business?.nextInvoiceNumber).toBe(8);
   });
 
   it("produces unique numbers under concurrent calls", async () => {
-    const results = await Promise.all([1, 2, 3].map(() => assignInvoiceNumber(userId)));
+    const results = await Promise.all([1, 2, 3].map(() => assignInvoiceNumber(businessId)));
     const set = new Set(results);
     expect(set.size).toBe(3);
   });

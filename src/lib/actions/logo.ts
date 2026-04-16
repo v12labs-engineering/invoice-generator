@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@supabase/supabase-js";
-import { requireUserId } from "./_shared";
+import { requireMembership } from "./_shared";
 import { db } from "@/lib/db";
 import { err, ok, type Result } from "@/lib/result";
 import { revalidatePath } from "next/cache";
@@ -19,11 +19,12 @@ function storageClient() {
 }
 
 export async function uploadLogo(formData: FormData): Promise<Result<{ url: string }>> {
-  let userId: string;
+  let businessId: string;
   try {
-    userId = await requireUserId();
+    const m = await requireMembership("OWNER");
+    businessId = m.businessId;
   } catch {
-    return err("Unauthenticated");
+    return err("Unauthorized");
   }
 
   const file = formData.get("logo");
@@ -32,7 +33,7 @@ export async function uploadLogo(formData: FormData): Promise<Result<{ url: stri
   if (!ALLOWED.has(file.type)) return err("Use PNG, JPEG, WebP, or SVG");
 
   const ext = file.name.includes(".") ? file.name.split(".").pop() : "png";
-  const path = `${userId}/logo-${Date.now()}.${ext}`;
+  const path = `${businessId}/logo-${Date.now()}.${ext}`;
 
   const storage = storageClient();
   const { error: uploadError } = await storage.storage
@@ -43,35 +44,32 @@ export async function uploadLogo(formData: FormData): Promise<Result<{ url: stri
   const { data: pub } = storage.storage.from(BUCKET).getPublicUrl(path);
   const url = pub.publicUrl;
 
-  const profile = await db.businessProfile.findUnique({ where: { userId } });
-  if (!profile) {
-    return err("Save your business profile first, then upload a logo");
-  }
-  await db.businessProfile.update({ where: { userId }, data: { logoUrl: url } });
+  await db.business.update({ where: { id: businessId }, data: { logoUrl: url } });
 
   revalidatePath("/settings");
   return ok({ url });
 }
 
 export async function removeLogo(): Promise<Result<null>> {
-  let userId: string;
+  let businessId: string;
   try {
-    userId = await requireUserId();
+    const m = await requireMembership("OWNER");
+    businessId = m.businessId;
   } catch {
-    return err("Unauthenticated");
+    return err("Unauthorized");
   }
 
-  const profile = await db.businessProfile.findUnique({ where: { userId } });
-  if (!profile?.logoUrl) return ok(null);
+  const business = await db.business.findUnique({ where: { id: businessId } });
+  if (!business?.logoUrl) return ok(null);
 
   const marker = `/${BUCKET}/`;
-  const idx = profile.logoUrl.indexOf(marker);
+  const idx = business.logoUrl.indexOf(marker);
   if (idx !== -1) {
-    const path = profile.logoUrl.slice(idx + marker.length);
+    const path = business.logoUrl.slice(idx + marker.length);
     await storageClient().storage.from(BUCKET).remove([path]);
   }
 
-  await db.businessProfile.update({ where: { userId }, data: { logoUrl: null } });
+  await db.business.update({ where: { id: businessId }, data: { logoUrl: null } });
   revalidatePath("/settings");
   return ok(null);
 }

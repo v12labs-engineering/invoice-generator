@@ -14,11 +14,9 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
-  profile       BusinessProfile?
-  clients       Client[]
-  products      Product[]
+  memberships   Membership[]
+  invitesSent   Invite[]    @relation("invitedBy")
   invoices      Invoice[]
-  schedules     RecurringSchedule[]
   createdAt     DateTime  @default(now())
 }
 
@@ -54,10 +52,13 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model BusinessProfile {
+enum MemberRole {
+  OWNER
+  MEMBER
+}
+
+model Business {
   id                String   @id @default(cuid())
-  userId            String   @unique
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   name              String
   addressLines      String[]
   email             String
@@ -70,13 +71,46 @@ model BusinessProfile {
   invoicePrefix     String   @default("INV-")
   nextInvoiceNumber Int      @default(1)
   defaultTemplate   InvoiceTemplate @default(CLASSIC)
+  memberships       Membership[]
+  invites           Invite[]
+  clients           Client[]
+  products          Product[]
+  invoices          Invoice[]
+  schedules         RecurringSchedule[]
+  createdAt         DateTime @default(now())
   updatedAt         DateTime @default(now()) @updatedAt
+}
+
+model Membership {
+  id         String     @id @default(cuid())
+  userId     String
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessId String
+  business   Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  role       MemberRole @default(MEMBER)
+  createdAt  DateTime   @default(now())
+  @@unique([userId, businessId])
+  @@index([businessId])
+}
+
+model Invite {
+  id          String     @id @default(cuid())
+  businessId  String
+  business    Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  email       String
+  role        MemberRole @default(MEMBER)
+  invitedById String
+  invitedBy   User       @relation("invitedBy", fields: [invitedById], references: [id])
+  acceptedAt  DateTime?
+  createdAt   DateTime   @default(now())
+  @@unique([businessId, email])
+  @@index([email])
 }
 
 model Client {
   id           String    @id @default(cuid())
-  userId       String
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessId   String
+  business     Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
   name         String
   email        String?
   addressLines String[]
@@ -87,13 +121,13 @@ model Client {
   schedules    RecurringSchedule[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @default(now()) @updatedAt
-  @@index([userId])
+  @@index([businessId])
 }
 
 model Product {
   id             String   @id @default(cuid())
-  userId         String
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessId     String
+  business       Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
   name           String
   description    String?
   unitPrice      Int
@@ -102,7 +136,7 @@ model Product {
   archivedAt     DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @default(now()) @updatedAt
-  @@index([userId])
+  @@index([businessId])
 }
 
 enum InvoiceStatus {
@@ -121,8 +155,10 @@ enum InvoiceTemplate {
 
 model Invoice {
   id                  String        @id @default(cuid())
-  userId              String
-  user                User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessId          String
+  business            Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  createdByUserId     String?
+  createdByUser       User?         @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
   number              String?
   clientId            String
   client              Client        @relation(fields: [clientId], references: [id])
@@ -147,11 +183,11 @@ model Invoice {
   payments            Payment[]
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @default(now()) @updatedAt
-  @@unique([userId, number])
-  @@index([userId, status])
-  @@index([userId, issueDate])
-  @@index([userId, clientId])
-  @@index([userId, status, dueDate])
+  @@unique([businessId, number])
+  @@index([businessId, status])
+  @@index([businessId, issueDate])
+  @@index([businessId, clientId])
+  @@index([businessId, status, dueDate])
 }
 
 model InvoiceLine {
@@ -192,8 +228,8 @@ enum Cadence {
 
 model RecurringSchedule {
   id            String    @id @default(cuid())
-  userId        String
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessId    String
+  business      Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
   clientId      String
   client        Client    @relation(fields: [clientId], references: [id])
   templateJson  Json
@@ -208,5 +244,5 @@ model RecurringSchedule {
   invoices      Invoice[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  @@index([userId, active, nextRunAt])
+  @@index([businessId, active, nextRunAt])
 }

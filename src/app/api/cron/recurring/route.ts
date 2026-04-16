@@ -36,7 +36,7 @@ async function handle(req: Request) {
 
     await db.invoice.create({
       data: {
-        userId: s.userId,
+        businessId: s.businessId,
         clientId: s.clientId,
         issueDate: now,
         dueDate: new Date(now.getTime() + 14 * 86400000),

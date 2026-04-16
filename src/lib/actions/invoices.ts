@@ -5,7 +5,7 @@ import { InvoiceInput, type InvoiceLineInput } from "@/lib/schemas/invoice";
 import { calcInvoiceTotals, calcLineTotal } from "@/lib/money";
 import { err, ok, type Result } from "@/lib/result";
 import { revalidatePath } from "next/cache";
-import { requireUserId } from "./_shared";
+import { requireMembership } from "./_shared";
 import type { InvoiceStatus } from "@prisma/client";
 import { assignInvoiceNumber } from "@/lib/invoice-number";
 import { buildPdfData, renderInvoicePdf } from "@/lib/pdf/render";
@@ -29,18 +29,18 @@ function buildLineData(lines: InvoiceLineInput[]) {
 }
 
 export async function listInvoices(status?: InvoiceStatus) {
-  const userId = await requireUserId();
+  const { businessId } = await requireMembership();
   return db.invoice.findMany({
-    where: { userId, ...(status ? { status } : {}) },
+    where: { businessId, ...(status ? { status } : {}) },
     include: { client: true },
     orderBy: { createdAt: "desc" },
   });
 }
 
 export async function getInvoice(id: string) {
-  const userId = await requireUserId();
+  const { businessId } = await requireMembership();
   return db.invoice.findFirst({
-    where: { id, userId },
+    where: { id, businessId },
     include: {
       client: true,
       lines: { orderBy: { sortOrder: "asc" } },
@@ -50,7 +50,7 @@ export async function getInvoice(id: string) {
 }
 
 export async function createInvoice(input: unknown): Promise<Result<{ id: string }>> {
-  const userId = await requireUserId();
+  const { businessId, userId } = await requireMembership();
   const parsed = InvoiceInput.safeParse(input);
   if (!parsed.success) return err(parsed.error.issues[0]?.message ?? "Invalid input");
 
@@ -60,10 +60,11 @@ export async function createInvoice(input: unknown): Promise<Result<{ id: string
   );
 
   try {
-    const number = await assignInvoiceNumber(userId);
+    const number = await assignInvoiceNumber(businessId);
     const inv = await db.invoice.create({
       data: {
-        userId,
+        businessId,
+        createdByUserId: userId,
         number,
         clientId: parsed.data.clientId,
         issueDate: parsed.data.issueDate,
@@ -88,8 +89,8 @@ export async function createInvoice(input: unknown): Promise<Result<{ id: string
 }
 
 export async function deleteDraftInvoice(id: string): Promise<Result<null>> {
-  const userId = await requireUserId();
-  const existing = await db.invoice.findFirst({ where: { id, userId } });
+  const { businessId } = await requireMembership();
+  const existing = await db.invoice.findFirst({ where: { id, businessId } });
   if (!existing) return err("Not found");
   if (existing.status !== "DRAFT") return err("Only drafts can be deleted");
 
@@ -103,11 +104,11 @@ export async function deleteDraftInvoice(id: string): Promise<Result<null>> {
 }
 
 export async function updateDraftInvoice(id: string, input: unknown): Promise<Result<null>> {
-  const userId = await requireUserId();
+  const { businessId } = await requireMembership();
   const parsed = InvoiceInput.safeParse(input);
   if (!parsed.success) return err(parsed.error.issues[0]?.message ?? "Invalid input");
 
-  const existing = await db.invoice.findFirst({ where: { id, userId } });
+  const existing = await db.invoice.findFirst({ where: { id, businessId } });
   if (!existing) return err("Not found");
   if (existing.status !== "DRAFT") return err("Only drafts can be edited");
 
@@ -146,20 +147,20 @@ export async function updateDraftInvoice(id: string, input: unknown): Promise<Re
 }
 
 export async function finalizeInvoice(id: string): Promise<Result<null>> {
-  const userId = await requireUserId();
+  const { businessId } = await requireMembership();
 
-  const invoice = await db.invoice.findFirst({ where: { id, userId } });
+  const invoice = await db.invoice.findFirst({ where: { id, businessId } });
   if (!invoice) return err("Not found");
   if (invoice.status !== "DRAFT") return err("Only drafts can be finalized");
 
   try {
     let number = invoice.number;
     if (!number) {
-      number = await assignInvoiceNumber(userId);
+      number = await assignInvoiceNumber(businessId);
       await db.invoice.update({ where: { id }, data: { number } });
     }
 
-    const built = await buildPdfData(id, userId);
+    const built = await buildPdfData(id, businessId);
     if (!built) return err("Failed to build PDF data");
     const pdfBuffer = await renderInvoicePdf(built.data, built.template);
 
@@ -187,9 +188,9 @@ export async function finalizeInvoice(id: string): Promise<Result<null>> {
 }
 
 export async function voidInvoice(id: string): Promise<Result<null>> {
-  const userId = await requireUserId();
+  const { businessId } = await requireMembership();
   const result = await db.invoice.updateMany({
-    where: { id, userId },
+    where: { id, businessId },
     data: { status: "VOID" },
   });
   if (result.count === 0) return err("Not found");
@@ -202,10 +203,10 @@ export async function sendInvoice(
   recipientEmail: string,
   message?: string,
 ): Promise<Result<null>> {
-  const userId = await requireUserId();
+  const { businessId } = await requireMembership();
 
   const invoice = await db.invoice.findFirst({
-    where: { id, userId },
+    where: { id, businessId },
     include: { client: true },
   });
   if (!invoice) return err("Not found");
@@ -216,12 +217,12 @@ export async function sendInvoice(
     // Assign number if not yet assigned
     let number = invoice.number;
     if (!number) {
-      number = await assignInvoiceNumber(userId);
+      number = await assignInvoiceNumber(businessId);
       await db.invoice.update({ where: { id }, data: { number } });
     }
 
     // Render PDF
-    const built = await buildPdfData(id, userId);
+    const built = await buildPdfData(id, businessId);
     if (!built) return err("Failed to build PDF data");
     const pdfData = built.data;
     const pdfBuffer = await renderInvoicePdf(built.data, built.template);
