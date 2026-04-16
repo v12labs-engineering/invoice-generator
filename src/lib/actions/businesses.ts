@@ -9,6 +9,7 @@ import {
   requireMembership,
   ACTIVE_BUSINESS_COOKIE_NAME,
 } from "./_shared";
+import { sendInviteEmail } from "@/lib/email/send-invite";
 
 const COOKIE_OPTS = {
   httpOnly: false,
@@ -157,6 +158,23 @@ export async function inviteMember(input: {
     create: { businessId, email, role, invitedById: userId },
     update: { role, acceptedAt: null, invitedById: userId, createdAt: new Date() },
   });
+
+  // Best-effort email; invite works even if email fails (auto-accepts on sign-in).
+  try {
+    const [business, inviter] = await Promise.all([
+      db.business.findUniqueOrThrow({ where: { id: businessId } }),
+      db.user.findUniqueOrThrow({ where: { id: userId } }),
+    ]);
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://invoices.v12labs.io";
+    await sendInviteEmail({
+      to: email,
+      businessName: business.name,
+      inviterEmail: inviter.email,
+      appUrl,
+    });
+  } catch (e) {
+    console.warn("Invite email failed:", e);
+  }
 
   revalidatePath("/team");
   return ok({ id: invite.id });
