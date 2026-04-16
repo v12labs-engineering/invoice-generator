@@ -60,7 +60,7 @@ export default async function ProductsPage() {
                 <Label htmlFor="description">Description</Label>
                 <Input id="description" name="description" />
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="unitPrice">Unit price</Label>
                   <Input id="unitPrice" name="unitPrice" type="number" step="0.01" required />

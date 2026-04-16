@@ -14,16 +14,15 @@ export function ThemeToggle() {
   return (
     <Button
       variant="ghost"
-      size="sm"
       onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label="Toggle theme"
-      className="w-full justify-start gap-2"
+      className="h-11 w-full justify-start gap-3 rounded-lg px-3 text-[0.95rem] font-medium text-muted-foreground hover:bg-primary/5 hover:text-foreground [&_svg]:size-5"
       suppressHydrationWarning
     >
       {mounted ? (
-        isDark ? <Moon className="size-4" /> : <Sun className="size-4" />
+        isDark ? <Moon /> : <Sun />
       ) : (
-        <Sun className="size-4 opacity-0" />
+        <Sun className="opacity-0" />
       )}
       <span suppressHydrationWarning>
         {mounted ? (isDark ? "Dark" : "Light") : ""} mode

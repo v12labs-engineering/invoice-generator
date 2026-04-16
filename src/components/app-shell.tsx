@@ -37,12 +37,12 @@ export function AppShell({
   return (
     <SidebarProvider>
       <Sidebar collapsible="icon">
-        <SidebarHeader>
+        <SidebarHeader className="gap-2 px-3 py-3 group-data-[collapsible=icon]:px-2">
           <Link
             href="/dashboard"
-            className="flex items-center gap-2 px-2 py-1.5 text-sm font-semibold tracking-tight"
+            className="flex items-center gap-2 px-1 py-0.5 text-sm font-semibold tracking-tight"
           >
-            <div className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <Receipt className="size-4" />
             </div>
             <span className="group-data-[collapsible=icon]:hidden">Invoicer</span>
@@ -60,26 +60,23 @@ export function AppShell({
             <SidebarNav />
           </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter className="gap-1">
+        <SidebarFooter className="gap-1 px-3 py-3 group-data-[collapsible=icon]:px-2">
           <ThemeToggle />
           <form action={signOut}>
             <Button
               type="submit"
               variant="ghost"
-              size="sm"
-              className="w-full justify-start gap-2"
+              className="h-11 w-full justify-start gap-3 rounded-lg px-3 text-[0.95rem] font-medium text-muted-foreground hover:bg-primary/5 hover:text-foreground [&_svg]:size-5"
             >
-              <LogOut className="size-4" />
+              <LogOut />
               <span>Sign out</span>
             </Button>
           </form>
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <header className="sticky top-0 z-10 flex h-12 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur">
+        <header className="sticky top-0 z-10 flex h-12 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur md:hidden">
           <SidebarTrigger className="-ml-1" />
-          <div className="h-4 w-px bg-border" />
-          <span className="text-sm text-muted-foreground">Invoicer</span>
         </header>
         <main className="flex-1">{children}</main>
       </SidebarInset>

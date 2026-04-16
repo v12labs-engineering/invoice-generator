@@ -219,7 +219,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                   successMessage="Payment recorded"
                   className="space-y-4"
                 >
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <div className="space-y-2">
                       <Label htmlFor="amount">Amount</Label>
                       <Input id="amount" name="amount" type="number" step="0.01" required />

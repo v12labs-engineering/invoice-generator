@@ -71,7 +71,7 @@ export function BusinessSwitcher({
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="group/button inline-flex h-8 w-full shrink-0 items-center justify-between gap-2 whitespace-nowrap rounded-lg border border-transparent bg-clip-padding px-2 text-sm font-medium outline-none transition-all hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-expanded:bg-muted aria-expanded:text-foreground disabled:pointer-events-none disabled:opacity-50 dark:hover:bg-muted/50"
+        className="group/button inline-flex h-11 w-full shrink-0 items-center justify-between gap-2 whitespace-nowrap rounded-lg border bg-background px-3 text-sm font-medium outline-none transition-all hover:bg-muted focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-expanded:bg-muted disabled:pointer-events-none disabled:opacity-50"
       >
         <span className="flex min-w-0 items-center gap-2">
           <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
