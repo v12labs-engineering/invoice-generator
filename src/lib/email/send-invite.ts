@@ -6,7 +6,7 @@ export async function sendInviteEmail(params: {
   inviterEmail: string;
   appUrl: string;
 }): Promise<void> {
-  const apiKey = process.env.AUTH_RESEND_KEY;
+  const apiKey = process.env.RESEND_API_KEY ?? process.env.AUTH_RESEND_KEY;
   const from = process.env.RESEND_FROM;
   if (!apiKey || !from) {
     // Silently skip email if not configured — invite still works via auto-accept.
