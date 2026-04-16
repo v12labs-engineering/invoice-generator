@@ -11,12 +11,22 @@ import {
   SidebarHeader,
   SidebarInset,
   SidebarProvider,
+  SidebarSeparator,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { SidebarNav } from "@/components/sidebar-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { BusinessSwitcher, type Membership } from "@/components/business-switcher";
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({
+  children,
+  memberships,
+  activeBusinessId,
+}: {
+  children: React.ReactNode;
+  memberships: Membership[];
+  activeBusinessId: string | null;
+}) {
   async function signOut() {
     "use server";
     const supabase = await supabaseServer();
@@ -37,7 +47,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
             <span className="group-data-[collapsible=icon]:hidden">Invoicer</span>
           </Link>
+          <div className="group-data-[collapsible=icon]:hidden">
+            <BusinessSwitcher
+              memberships={memberships}
+              activeBusinessId={activeBusinessId}
+            />
+          </div>
         </SidebarHeader>
+        <SidebarSeparator />
         <SidebarContent>
           <SidebarGroup>
             <SidebarNav />

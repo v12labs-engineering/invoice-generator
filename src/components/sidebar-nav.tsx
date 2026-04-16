@@ -9,6 +9,7 @@ import {
   Package,
   Repeat,
   Settings,
+  UsersRound,
 } from "lucide-react";
 import {
   SidebarMenu,
@@ -22,6 +23,7 @@ const nav = [
   { href: "/clients", label: "Clients", icon: Users },
   { href: "/products", label: "Products", icon: Package },
   { href: "/recurring", label: "Recurring", icon: Repeat },
+  { href: "/team", label: "Team", icon: UsersRound },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
