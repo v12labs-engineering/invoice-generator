@@ -12,6 +12,7 @@ import {
 } from "@/lib/actions/invoices";
 import { recordPayment } from "@/lib/actions/payments";
 import { formatMoney } from "@/lib/money";
+import type { Result } from "@/lib/result";
 import { effectiveStatus, StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/page-header";
 import { FormSubmitButton } from "@/components/form-submit-button";
 import { InvoiceForm } from "@/components/invoice-form";
+import { ToastForm } from "@/components/toast-form";
 import {
   Card,
   CardContent,
@@ -39,7 +41,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
     async function save(formData: FormData) {
       "use server";
       const lines = JSON.parse(String(formData.get("linesJson") ?? "[]"));
-      await updateDraftInvoice(id, {
+      const res = await updateDraftInvoice(id, {
         clientId: formData.get("clientId"),
         issueDate: formData.get("issueDate"),
         dueDate: formData.get("dueDate"),
@@ -50,15 +52,17 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         globalDiscount: 0,
         lines,
       });
+      if (!res.ok) throw new Error(res.error);
     }
-    async function finalize() {
+    async function finalize(_prev: Result<null> | null, _fd: FormData) {
       "use server";
-      await finalizeInvoice(id);
+      return finalizeInvoice(id);
     }
-    async function deleteDraft() {
+    async function deleteDraft(_prev: Result<null> | null, _fd: FormData) {
       "use server";
       const res = await deleteDraftInvoice(id);
       if (res.ok) redirect("/invoices");
+      return res;
     }
 
     return (
@@ -69,18 +73,18 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
           actions={
             <div className="flex flex-wrap items-center gap-2">
               <StatusBadge status={effectiveStatus(invoice)} />
-              <form action={deleteDraft}>
-                <Button type="submit" variant="outline" size="sm">
+              <ToastForm<null> action={deleteDraft} successMessage="Draft deleted">
+                <FormSubmitButton variant="outline" size="sm">
                   <Trash2 className="size-3.5" />
                   Delete
-                </Button>
-              </form>
-              <form action={finalize}>
-                <Button type="submit" size="sm">
+                </FormSubmitButton>
+              </ToastForm>
+              <ToastForm<null> action={finalize} successMessage="Invoice finalized">
+                <FormSubmitButton size="sm">
                   <CheckCircle2 className="size-3.5" />
                   Finalize
-                </Button>
-              </form>
+                </FormSubmitButton>
+              </ToastForm>
             </div>
           }
         />
@@ -122,6 +126,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             })),
           }}
           submitLabel="Save changes"
+          successToast="Changes saved"
           onSubmit={save}
         />
       </div>
@@ -129,13 +134,13 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
   }
 
   // Non-draft: read-only summary with Send/Pay/Void actions.
-  async function send(fd: FormData) {
+  async function send(_prev: Result<null> | null, fd: FormData) {
     "use server";
-    await sendInvoice(id, String(fd.get("to")), String(fd.get("message") ?? ""));
+    return sendInvoice(id, String(fd.get("to")), String(fd.get("message") ?? ""));
   }
-  async function pay(fd: FormData) {
+  async function pay(_prev: Result<null> | null, fd: FormData) {
     "use server";
-    await recordPayment({
+    return recordPayment({
       invoiceId: id,
       amount: Math.round(Number(fd.get("amount")) * 100),
       paidAt: fd.get("paidAt"),
@@ -143,9 +148,9 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
       reference: fd.get("reference"),
     });
   }
-  async function voidIt() {
+  async function voidIt(_prev: Result<null> | null, _fd: FormData) {
     "use server";
-    await voidInvoice(id);
+    return voidInvoice(id);
   }
 
   const status = effectiveStatus(invoice);
@@ -209,7 +214,11 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                 <CardDescription>Log a payment received for this invoice.</CardDescription>
               </CardHeader>
               <CardContent>
-                <form action={pay} className="space-y-4">
+                <ToastForm<null>
+                  action={pay}
+                  successMessage="Payment recorded"
+                  className="space-y-4"
+                >
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                     <div className="space-y-2">
                       <Label htmlFor="amount">Amount</Label>
@@ -245,7 +254,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                     <Input id="reference" name="reference" />
                   </div>
                   <FormSubmitButton>Record payment</FormSubmitButton>
-                </form>
+                </ToastForm>
               </CardContent>
             </Card>
           )}
@@ -256,7 +265,11 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
               <CardDescription>Send this invoice to your client.</CardDescription>
             </CardHeader>
             <CardContent>
-              <form action={send} className="space-y-4">
+              <ToastForm<null>
+                action={send}
+                successMessage="Invoice sent"
+                className="space-y-4"
+              >
                 <div className="space-y-2">
                   <Label htmlFor="to">Recipient</Label>
                   <Input
@@ -275,7 +288,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                   <Send className="size-4" />
                   Send invoice
                 </FormSubmitButton>
-              </form>
+              </ToastForm>
             </CardContent>
           </Card>
         </div>
@@ -297,16 +310,15 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                 Download PDF
               </Button>
               {canVoid && (
-                <form action={voidIt}>
-                  <Button
+                <ToastForm<null> action={voidIt} successMessage="Invoice voided">
+                  <FormSubmitButton
                     variant="destructive"
-                    type="submit"
                     className="w-full justify-start"
                   >
                     <Ban className="size-4" />
                     Void invoice
-                  </Button>
-                </form>
+                  </FormSubmitButton>
+                </ToastForm>
               )}
             </CardContent>
           </Card>

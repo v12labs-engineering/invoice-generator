@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -67,6 +68,7 @@ export function InvoiceForm({
   business,
   initial,
   submitLabel = "Save draft",
+  successToast = "Saved",
   onSubmit,
 }: {
   clients: ClientInfo[];
@@ -83,6 +85,7 @@ export function InvoiceForm({
   };
   initial?: Initial;
   submitLabel?: string;
+  successToast?: string | null;
   onSubmit: (fd: FormData) => Promise<void>;
 }) {
   const today = new Date().toISOString().slice(0, 10);
@@ -109,7 +112,12 @@ export function InvoiceForm({
 
   async function submit(formData: FormData) {
     formData.set("linesJson", JSON.stringify(lines));
-    await onSubmit(formData);
+    try {
+      await onSubmit(formData);
+      if (successToast) toast.success(successToast);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Save failed");
+    }
   }
 
   const previewData = {

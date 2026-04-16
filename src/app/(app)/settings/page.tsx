@@ -1,10 +1,12 @@
 import { getBusinessProfile, upsertBusinessProfile } from "@/lib/actions/settings";
+import type { Result } from "@/lib/result";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PageHeader } from "@/components/page-header";
 import { FormSubmitButton } from "@/components/form-submit-button";
 import { TemplatePicker } from "@/components/template-picker";
+import { ToastForm } from "@/components/toast-form";
 import {
   Card,
   CardContent,
@@ -16,9 +18,9 @@ import {
 export default async function SettingsPage() {
   const profile = await getBusinessProfile();
 
-  async function save(formData: FormData) {
+  async function save(_prev: Result<{ id: string }> | null, formData: FormData) {
     "use server";
-    const input = {
+    return upsertBusinessProfile({
       name: formData.get("name"),
       email: formData.get("email"),
       phone: formData.get("phone"),
@@ -32,8 +34,7 @@ export default async function SettingsPage() {
         .split("\n")
         .map((s) => s.trim())
         .filter(Boolean),
-    };
-    await upsertBusinessProfile(input);
+    });
   }
 
   return (
@@ -42,7 +43,11 @@ export default async function SettingsPage() {
         title="Settings"
         description="Business information shown on invoices and used as defaults."
       />
-      <form action={save} className="space-y-6">
+      <ToastForm<{ id: string }>
+        action={save}
+        successMessage="Settings saved"
+        className="space-y-6"
+      >
         <Card>
           <CardHeader>
             <CardTitle>Business profile</CardTitle>
@@ -114,7 +119,7 @@ export default async function SettingsPage() {
         <div className="flex justify-end">
           <FormSubmitButton>Save changes</FormSubmitButton>
         </div>
-      </form>
+      </ToastForm>
     </div>
   );
 }
