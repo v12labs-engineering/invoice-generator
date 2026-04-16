@@ -56,7 +56,7 @@ export function AppShell({
         </SidebarHeader>
         <SidebarSeparator />
         <SidebarContent>
-          <SidebarGroup>
+          <SidebarGroup className="px-3 py-3 group-data-[collapsible=icon]:px-2">
             <SidebarNav />
           </SidebarGroup>
         </SidebarContent>

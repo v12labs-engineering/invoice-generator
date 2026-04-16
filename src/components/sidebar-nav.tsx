@@ -16,6 +16,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 
 const nav = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -30,7 +31,7 @@ const nav = [
 export function SidebarNav() {
   const pathname = usePathname();
   return (
-    <SidebarMenu>
+    <SidebarMenu className="gap-1 py-1">
       {nav.map((item) => {
         const active =
           pathname === item.href ||
@@ -39,8 +40,20 @@ export function SidebarNav() {
         const Icon = item.icon;
         return (
           <SidebarMenuItem key={item.href}>
-            <SidebarMenuButton isActive={active} tooltip={item.label} render={<Link href={item.href} />}>
-              <Icon className="size-4" />
+            <SidebarMenuButton
+              isActive={active}
+              tooltip={item.label}
+              render={<Link href={item.href} />}
+              className={cn(
+                "h-11 gap-3 rounded-lg px-3 text-[0.95rem] font-medium transition-colors",
+                "[&_svg]:size-5 [&_svg]:shrink-0",
+                "text-muted-foreground hover:bg-primary/5 hover:text-foreground",
+                "data-active:bg-primary/10 data-active:text-primary data-active:font-semibold",
+                "data-active:[&_svg]:text-primary",
+                "group-data-[collapsible=icon]:h-9 group-data-[collapsible=icon]:px-0",
+              )}
+            >
+              <Icon />
               <span>{item.label}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
