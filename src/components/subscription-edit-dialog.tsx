@@ -22,8 +22,8 @@ import {
 export type EditableSubscription = {
   id: string;
   name: string;
-  email: string | null;
-  addressLines: string[];
+  url: string | null;
+  cost: number | null;
   notes: string | null;
 };
 
@@ -49,7 +49,7 @@ export function SubscriptionEditDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit subscription</DialogTitle>
-          <DialogDescription>Update {subscription.name}&apos;s details.</DialogDescription>
+          <DialogDescription>Update {subscription.name} details.</DialogDescription>
         </DialogHeader>
         <ToastForm<null>
           className="space-y-4"
@@ -65,21 +65,25 @@ export function SubscriptionEditDialog({
             <Input id={`name-${subscription.id}`} name="name" required defaultValue={subscription.name} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor={`email-${subscription.id}`}>Email</Label>
+            <Label htmlFor={`url-${subscription.id}`}>URL</Label>
             <Input
-              id={`email-${subscription.id}`}
-              name="email"
-              type="email"
-              defaultValue={subscription.email ?? ""}
+              id={`url-${subscription.id}`}
+              name="url"
+              type="url"
+              placeholder="https://..."
+              defaultValue={subscription.url ?? ""}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor={`addressLines-${subscription.id}`}>Address</Label>
-            <Textarea
-              id={`addressLines-${subscription.id}`}
-              name="addressLines"
-              rows={2}
-              defaultValue={subscription.addressLines.join("\n")}
+            <Label htmlFor={`cost-${subscription.id}`}>Monthly cost</Label>
+            <Input
+              id={`cost-${subscription.id}`}
+              name="costDisplay"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+              defaultValue={subscription.cost != null ? (subscription.cost / 100).toFixed(2) : ""}
             />
           </div>
           <div className="space-y-2">
@@ -88,6 +92,7 @@ export function SubscriptionEditDialog({
               id={`notes-${subscription.id}`}
               name="notes"
               rows={2}
+              placeholder="Plan details, account info..."
               defaultValue={subscription.notes ?? ""}
             />
           </div>

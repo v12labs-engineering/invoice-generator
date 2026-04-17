@@ -258,8 +258,8 @@ model Subscription {
   businessId   String
   business     Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
   name         String
-  email        String?
-  addressLines String[]
+  url          String?
+  cost         Int?
   notes        String?
   archivedAt   DateTime?
   expenses     Expense[]

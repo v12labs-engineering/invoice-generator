@@ -34,6 +34,12 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 
+function parseCost(fd: FormData): number | undefined {
+  const raw = String(fd.get("costDisplay") ?? "").trim();
+  if (!raw) return undefined;
+  return Math.round(parseFloat(raw) * 100);
+}
+
 export default async function SubscriptionsPage() {
   const [subscriptions, { businessId }] = await Promise.all([listSubscriptions(), requireMembership()]);
   const business = await db.business.findUnique({ where: { id: businessId } });
@@ -51,11 +57,8 @@ export default async function SubscriptionsPage() {
     "use server";
     return createSubscription({
       name: formData.get("name"),
-      email: formData.get("email"),
-      addressLines: String(formData.get("addressLines") ?? "")
-        .split("\n")
-        .map((s) => s.trim())
-        .filter(Boolean),
+      url: formData.get("url"),
+      cost: parseCost(formData),
       notes: formData.get("notes"),
     });
   }
@@ -64,11 +67,8 @@ export default async function SubscriptionsPage() {
     "use server";
     return updateSubscription(id, {
       name: formData.get("name"),
-      email: formData.get("email"),
-      addressLines: String(formData.get("addressLines") ?? "")
-        .split("\n")
-        .map((s) => s.trim())
-        .filter(Boolean),
+      url: formData.get("url"),
+      cost: parseCost(formData),
       notes: formData.get("notes"),
     });
   }
@@ -80,7 +80,7 @@ export default async function SubscriptionsPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
-      <PageHeader title="Subscriptions" description="Manage your recurring services and tools." />
+      <PageHeader title="Subscriptions" description="Track your recurring services and tools." />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         <Card>
@@ -96,19 +96,19 @@ export default async function SubscriptionsPage() {
             >
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
-                <Input id="name" name="name" required />
+                <Input id="name" name="name" required placeholder="AWS, Figma, Slack..." />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" name="email" type="email" />
+                <Label htmlFor="url">URL</Label>
+                <Input id="url" name="url" type="url" placeholder="https://..." />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="addressLines">Address</Label>
-                <Textarea id="addressLines" name="addressLines" rows={2} />
+                <Label htmlFor="costDisplay">Monthly cost</Label>
+                <Input id="costDisplay" name="costDisplay" type="number" step="0.01" min="0" placeholder="0.00" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="notes">Notes</Label>
-                <Textarea id="notes" name="notes" rows={2} />
+                <Textarea id="notes" name="notes" rows={2} placeholder="Plan details, account info..." />
               </div>
               <FormSubmitButton>
                 <Plus className="size-4" />
@@ -131,7 +131,7 @@ export default async function SubscriptionsPage() {
                 <TableHeader className="bg-muted/40">
                   <TableRow>
                     <TableHead className="px-4">Name</TableHead>
-                    <TableHead>Email</TableHead>
+                    <TableHead>Monthly cost</TableHead>
                     <TableHead className="text-right">Expenses</TableHead>
                     <TableHead className="text-right">Total spent</TableHead>
                     <TableHead className="w-40" />
@@ -142,8 +142,17 @@ export default async function SubscriptionsPage() {
                     const stats = statsMap.get(s.id);
                     return (
                     <TableRow key={s.id}>
-                      <TableCell className="px-4 font-medium">{s.name}</TableCell>
-                      <TableCell className="text-muted-foreground">{s.email ?? "—"}</TableCell>
+                      <TableCell className="px-4">
+                        <div className="font-medium">{s.name}</div>
+                        {s.url && (
+                          <a href={s.url} target="_blank" rel="noreferrer" className="text-xs text-muted-foreground hover:underline">
+                            {s.url.replace(/^https?:\/\//, "")}
+                          </a>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {s.cost != null ? formatMoney(s.cost, currency) : "—"}
+                      </TableCell>
                       <TableCell className="text-right text-muted-foreground">
                         {stats?._count ?? 0}
                       </TableCell>
@@ -158,8 +167,8 @@ export default async function SubscriptionsPage() {
                             subscription={{
                               id: s.id,
                               name: s.name,
-                              email: s.email,
-                              addressLines: s.addressLines,
+                              url: s.url,
+                              cost: s.cost,
                               notes: s.notes,
                             }}
                             action={edit.bind(null, s.id)}

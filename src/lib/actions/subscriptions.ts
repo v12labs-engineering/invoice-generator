@@ -21,7 +21,13 @@ export async function createSubscription(input: unknown): Promise<Result<{ id: s
 
   try {
     const subscription = await db.subscription.create({
-      data: { ...parsed.data, businessId, email: parsed.data.email || null },
+      data: {
+        businessId,
+        name: parsed.data.name,
+        url: parsed.data.url || null,
+        cost: parsed.data.cost ?? null,
+        notes: parsed.data.notes || null,
+      },
     });
     revalidatePath("/subscriptions");
     revalidatePath("/expenses");
@@ -39,7 +45,12 @@ export async function updateSubscription(id: string, input: unknown): Promise<Re
   try {
     const result = await db.subscription.updateMany({
       where: { id, businessId },
-      data: { ...parsed.data, email: parsed.data.email || null },
+      data: {
+        name: parsed.data.name,
+        url: parsed.data.url || null,
+        cost: parsed.data.cost ?? null,
+        notes: parsed.data.notes || null,
+      },
     });
     if (result.count === 0) return err("Not found");
     revalidatePath("/subscriptions");
