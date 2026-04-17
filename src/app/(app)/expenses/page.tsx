@@ -44,11 +44,11 @@ export default async function ExpensesPage({
         description="Track and manage your business expenses."
         actions={
           <>
-            <Button variant="outline" size="sm" render={<Link href="/expenses/import" />}>
+            <Button variant="outline" render={<Link href="/expenses/import" />}>
               <FileUp className="size-4" />
               Import CSV
             </Button>
-            <Button size="sm" render={<Link href="/expenses/new" />}>
+            <Button render={<Link href="/expenses/new" />}>
               Add expense
             </Button>
           </>
@@ -61,10 +61,10 @@ export default async function ExpensesPage({
           title="No expenses yet"
           description="Add your first expense or import from a CSV file."
           action={
-            <Button size="sm" render={<Link href="/expenses/new" />}>
+            <Button render={<Link href="/expenses/new" />}>
               Add expense
             </Button>
-          }
+}
         />
       ) : (
         <div className="overflow-x-auto rounded-lg border bg-card">

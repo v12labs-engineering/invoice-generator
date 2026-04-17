@@ -36,7 +36,7 @@ export default async function ExpenseDetailPage({
   };
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 p-6 lg:p-8">
+    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
       <PageHeader
         title={expense.description}
         description={expense.date.toISOString().slice(0, 10)}

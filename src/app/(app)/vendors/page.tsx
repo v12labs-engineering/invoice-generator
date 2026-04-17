@@ -7,6 +7,7 @@ import {
 } from "@/lib/actions/vendors";
 import { db } from "@/lib/db";
 import { requireMembership } from "@/lib/actions/_shared";
+import { formatMoney } from "@/lib/money";
 import type { Result } from "@/lib/result";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,6 +36,8 @@ import { Button } from "@/components/ui/button";
 
 export default async function VendorsPage() {
   const [vendors, { businessId }] = await Promise.all([listVendors(), requireMembership()]);
+  const business = await db.business.findUnique({ where: { id: businessId } });
+  const currency = business?.defaultCurrency ?? "USD";
 
   const rawStats = await db.expense.groupBy({
     by: ["vendorId"],
@@ -146,7 +149,7 @@ export default async function VendorsPage() {
                       </TableCell>
                       <TableCell className="text-right text-muted-foreground">
                         {stats?._sum.amount != null
-                          ? `$${Number(stats._sum.amount).toFixed(2)}`
+                          ? formatMoney(Number(stats._sum.amount), currency)
                           : "—"}
                       </TableCell>
                       <TableCell className="text-right">
