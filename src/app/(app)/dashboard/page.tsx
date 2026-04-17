@@ -1,4 +1,4 @@
-import { AlertCircle, CircleDollarSign, TrendingUp } from "lucide-react";
+import { AlertCircle, CircleDollarSign, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import type { ComponentType } from "react";
 import type { LucideProps } from "lucide-react";
 import { db } from "@/lib/db";
@@ -17,7 +17,9 @@ import {
 export default async function DashboardPage() {
   const { businessId } = await requireMembership();
 
-  const [outstanding, paidThisMonth, overdue, business] = await Promise.all([
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+  const [outstanding, paidThisMonth, overdue, business, expensesThisMonth] = await Promise.all([
     db.invoice.aggregate({
       where: { businessId, status: { in: ["SENT", "PARTIAL"] } },
       _sum: { balance: true },
@@ -25,7 +27,7 @@ export default async function DashboardPage() {
     db.payment.aggregate({
       where: {
         invoice: { businessId },
-        paidAt: { gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) },
+        paidAt: { gte: monthStart },
       },
       _sum: { amount: true },
     }),
@@ -33,14 +35,21 @@ export default async function DashboardPage() {
       where: { businessId, status: { in: ["SENT", "PARTIAL"] }, dueDate: { lt: new Date() } },
     }),
     db.business.findUnique({ where: { id: businessId } }),
+    db.expense.aggregate({
+      where: { businessId, date: { gte: monthStart } },
+      _sum: { amount: true },
+    }),
   ]);
 
   const currency = business?.defaultCurrency ?? "USD";
+  const paid = paidThisMonth._sum.amount ?? 0;
+  const expenses = expensesThisMonth._sum.amount ?? 0;
+  const net = paid - expenses;
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
-      <PageHeader title="Dashboard" description="Overview of your invoicing activity." />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <PageHeader title="Dashboard" description="Overview of your business finances." />
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <Kpi
           label="Outstanding"
           value={formatMoney(outstanding._sum.balance ?? 0, currency)}
@@ -49,7 +58,7 @@ export default async function DashboardPage() {
         />
         <Kpi
           label="Paid this month"
-          value={formatMoney(paidThisMonth._sum.amount ?? 0, currency)}
+          value={formatMoney(paid, currency)}
           description="Total collected since the 1st"
           icon={TrendingUp}
         />
@@ -58,6 +67,18 @@ export default async function DashboardPage() {
           value={String(overdue)}
           description={overdue === 0 ? "No overdue invoices" : "Invoices past due date"}
           icon={AlertCircle}
+        />
+        <Kpi
+          label="Expenses this month"
+          value={formatMoney(expenses, currency)}
+          description="Total expenses recorded since the 1st"
+          icon={TrendingDown}
+        />
+        <Kpi
+          label="Net this month"
+          value={formatMoney(net, currency)}
+          description="Collected minus expenses this month"
+          icon={Wallet}
         />
       </div>
     </div>
