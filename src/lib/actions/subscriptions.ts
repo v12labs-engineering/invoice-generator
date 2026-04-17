@@ -1,66 +1,66 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { VendorInput } from "@/lib/schemas/vendor";
+import { SubscriptionInput } from "@/lib/schemas/subscription";
 import { err, ok, type Result } from "@/lib/result";
 import { revalidatePath } from "next/cache";
 import { requireMembership } from "./_shared";
 
-export async function listVendors() {
+export async function listSubscriptions() {
   const { businessId } = await requireMembership();
-  return db.vendor.findMany({
+  return db.subscription.findMany({
     where: { businessId, archivedAt: null },
     orderBy: { name: "asc" },
   });
 }
 
-export async function createVendor(input: unknown): Promise<Result<{ id: string }>> {
+export async function createSubscription(input: unknown): Promise<Result<{ id: string }>> {
   const { businessId } = await requireMembership();
-  const parsed = VendorInput.safeParse(input);
+  const parsed = SubscriptionInput.safeParse(input);
   if (!parsed.success) return err(parsed.error.issues[0]?.message ?? "Invalid input");
 
   try {
-    const vendor = await db.vendor.create({
+    const subscription = await db.subscription.create({
       data: { ...parsed.data, businessId, email: parsed.data.email || null },
     });
-    revalidatePath("/vendors");
+    revalidatePath("/subscriptions");
     revalidatePath("/expenses");
-    return ok({ id: vendor.id });
+    return ok({ id: subscription.id });
   } catch {
-    return err("Failed to create vendor");
+    return err("Failed to create subscription");
   }
 }
 
-export async function updateVendor(id: string, input: unknown): Promise<Result<null>> {
+export async function updateSubscription(id: string, input: unknown): Promise<Result<null>> {
   const { businessId } = await requireMembership();
-  const parsed = VendorInput.safeParse(input);
+  const parsed = SubscriptionInput.safeParse(input);
   if (!parsed.success) return err(parsed.error.issues[0]?.message ?? "Invalid input");
 
   try {
-    const result = await db.vendor.updateMany({
+    const result = await db.subscription.updateMany({
       where: { id, businessId },
       data: { ...parsed.data, email: parsed.data.email || null },
     });
     if (result.count === 0) return err("Not found");
-    revalidatePath("/vendors");
+    revalidatePath("/subscriptions");
     revalidatePath("/expenses");
     return ok(null);
   } catch {
-    return err("Failed to update vendor");
+    return err("Failed to update subscription");
   }
 }
 
-export async function archiveVendor(id: string): Promise<Result<null>> {
+export async function archiveSubscription(id: string): Promise<Result<null>> {
   const { businessId } = await requireMembership();
   try {
-    const result = await db.vendor.updateMany({
+    const result = await db.subscription.updateMany({
       where: { id, businessId },
       data: { archivedAt: new Date() },
     });
     if (result.count === 0) return err("Not found");
-    revalidatePath("/vendors");
+    revalidatePath("/subscriptions");
     return ok(null);
   } catch {
-    return err("Failed to archive vendor");
+    return err("Failed to archive subscription");
   }
 }

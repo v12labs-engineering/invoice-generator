@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getExpense } from "@/lib/actions/expenses";
 import { listCategories } from "@/lib/actions/categories";
-import { listVendors } from "@/lib/actions/vendors";
+import { listSubscriptions } from "@/lib/actions/subscriptions";
 import { ExpenseForm } from "@/components/expense-form";
 import { ExpenseAttachments } from "@/components/expense-attachments";
 import { PageHeader } from "@/components/page-header";
@@ -14,10 +14,10 @@ export default async function ExpenseDetailPage({
 }) {
   const { id } = await params;
 
-  const [expense, categories, vendors] = await Promise.all([
+  const [expense, categories, subscriptions] = await Promise.all([
     getExpense(id),
     listCategories(),
-    listVendors(),
+    listSubscriptions(),
   ]);
 
   if (!expense) notFound();
@@ -28,7 +28,7 @@ export default async function ExpenseDetailPage({
     amount: expense.amount,
     date: expense.date,
     categoryId: expense.categoryId,
-    vendorId: expense.vendorId,
+    subscriptionId: expense.subscriptionId,
     currency: expense.currency,
     paymentMethod: expense.paymentMethod,
     reference: expense.reference,
@@ -47,7 +47,7 @@ export default async function ExpenseDetailPage({
           <CardTitle>Expense details</CardTitle>
         </CardHeader>
         <CardContent>
-          <ExpenseForm expense={expenseForForm} categories={categories} vendors={vendors} />
+          <ExpenseForm expense={expenseForForm} categories={categories} subscriptions={subscriptions} />
         </CardContent>
       </Card>
 

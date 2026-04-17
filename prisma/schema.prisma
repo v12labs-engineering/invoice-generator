@@ -79,7 +79,7 @@ model Business {
   products          Product[]
   invoices          Invoice[]
   schedules         RecurringSchedule[]
-  vendors           Vendor[]
+  subscriptions     Subscription[]
   expenseCategories ExpenseCategory[]
   expenses          Expense[]
   bulkImports       BulkImport[]
@@ -253,7 +253,7 @@ model RecurringSchedule {
   @@index([businessId, active, nextRunAt])
 }
 
-model Vendor {
+model Subscription {
   id           String    @id @default(cuid())
   businessId   String
   business     Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
@@ -266,6 +266,7 @@ model Vendor {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @default(now()) @updatedAt
   @@unique([businessId, name])
+  @@map("Vendor")
   @@index([businessId, archivedAt])
 }
 
@@ -288,8 +289,8 @@ model Expense {
   id              String    @id @default(cuid())
   businessId      String
   business        Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  vendorId        String?
-  vendor          Vendor?   @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  subscriptionId  String?   @map("vendorId")
+  subscription    Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
   categoryId      String
   category        ExpenseCategory @relation(fields: [categoryId], references: [id])
   createdByUserId String
@@ -308,7 +309,7 @@ model Expense {
   updatedAt       DateTime  @default(now()) @updatedAt
   @@index([businessId, date])
   @@index([businessId, categoryId])
-  @@index([businessId, vendorId])
+  @@index([businessId, subscriptionId])
 }
 
 model ExpenseAttachment {

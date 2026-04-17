@@ -1,10 +1,10 @@
 import { Plus, Trash2, Store } from "lucide-react";
 import {
-  listVendors,
-  createVendor,
-  archiveVendor,
-  updateVendor,
-} from "@/lib/actions/vendors";
+  listSubscriptions,
+  createSubscription,
+  archiveSubscription,
+  updateSubscription,
+} from "@/lib/actions/subscriptions";
 import { db } from "@/lib/db";
 import { requireMembership } from "@/lib/actions/_shared";
 import { formatMoney } from "@/lib/money";
@@ -16,7 +16,7 @@ import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
 import { FormSubmitButton } from "@/components/form-submit-button";
 import { ToastForm } from "@/components/toast-form";
-import { VendorEditDialog } from "@/components/vendor-edit-dialog";
+import { SubscriptionEditDialog } from "@/components/subscription-edit-dialog";
 import {
   Card,
   CardContent,
@@ -34,22 +34,22 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 
-export default async function VendorsPage() {
-  const [vendors, { businessId }] = await Promise.all([listVendors(), requireMembership()]);
+export default async function SubscriptionsPage() {
+  const [subscriptions, { businessId }] = await Promise.all([listSubscriptions(), requireMembership()]);
   const business = await db.business.findUnique({ where: { id: businessId } });
   const currency = business?.defaultCurrency ?? "USD";
 
   const rawStats = await db.expense.groupBy({
-    by: ["vendorId"],
-    where: { businessId, vendorId: { not: null } },
+    by: ["subscriptionId"],
+    where: { businessId, subscriptionId: { not: null } },
     _count: true,
     _sum: { amount: true },
   });
-  const statsMap = new Map(rawStats.map((s) => [s.vendorId!, s]));
+  const statsMap = new Map(rawStats.map((s) => [s.subscriptionId!, s]));
 
   async function add(_prev: Result<{ id: string }> | null, formData: FormData) {
     "use server";
-    return createVendor({
+    return createSubscription({
       name: formData.get("name"),
       email: formData.get("email"),
       addressLines: String(formData.get("addressLines") ?? "")
@@ -62,7 +62,7 @@ export default async function VendorsPage() {
 
   async function edit(id: string, _prev: Result<null> | null, formData: FormData) {
     "use server";
-    return updateVendor(id, {
+    return updateSubscription(id, {
       name: formData.get("name"),
       email: formData.get("email"),
       addressLines: String(formData.get("addressLines") ?? "")
@@ -75,24 +75,24 @@ export default async function VendorsPage() {
 
   async function archive(id: string, _prev: Result<null> | null, _fd: FormData) {
     "use server";
-    return archiveVendor(id);
+    return archiveSubscription(id);
   }
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
-      <PageHeader title="Vendors" description="Manage your suppliers and service providers." />
+      <PageHeader title="Subscriptions" description="Manage your recurring services and tools." />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         <Card>
           <CardHeader>
-            <CardTitle>Add vendor</CardTitle>
-            <CardDescription>Create a new vendor record.</CardDescription>
+            <CardTitle>Add subscription</CardTitle>
+            <CardDescription>Track a new service or tool.</CardDescription>
           </CardHeader>
           <CardContent>
             <ToastForm<{ id: string }>
               className="space-y-4"
               action={add}
-              successMessage="Vendor added"
+              successMessage="Subscription added"
             >
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
@@ -112,18 +112,18 @@ export default async function VendorsPage() {
               </div>
               <FormSubmitButton>
                 <Plus className="size-4" />
-                Add vendor
+                Add subscription
               </FormSubmitButton>
             </ToastForm>
           </CardContent>
         </Card>
 
         <div>
-          {vendors.length === 0 ? (
+          {subscriptions.length === 0 ? (
             <EmptyState
               icon={Store}
-              title="No vendors yet"
-              description="Add your first vendor using the form on the left."
+              title="No subscriptions yet"
+              description="Add your first subscription using the form on the left."
             />
           ) : (
             <div className="overflow-x-auto rounded-lg border bg-card">
@@ -138,12 +138,12 @@ export default async function VendorsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {vendors.map((v) => {
-                    const stats = statsMap.get(v.id);
+                  {subscriptions.map((s) => {
+                    const stats = statsMap.get(s.id);
                     return (
-                    <TableRow key={v.id}>
-                      <TableCell className="px-4 font-medium">{v.name}</TableCell>
-                      <TableCell className="text-muted-foreground">{v.email ?? "—"}</TableCell>
+                    <TableRow key={s.id}>
+                      <TableCell className="px-4 font-medium">{s.name}</TableCell>
+                      <TableCell className="text-muted-foreground">{s.email ?? "—"}</TableCell>
                       <TableCell className="text-right text-muted-foreground">
                         {stats?._count ?? 0}
                       </TableCell>
@@ -154,19 +154,19 @@ export default async function VendorsPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
-                          <VendorEditDialog
-                            vendor={{
-                              id: v.id,
-                              name: v.name,
-                              email: v.email,
-                              addressLines: v.addressLines,
-                              notes: v.notes,
+                          <SubscriptionEditDialog
+                            subscription={{
+                              id: s.id,
+                              name: s.name,
+                              email: s.email,
+                              addressLines: s.addressLines,
+                              notes: s.notes,
                             }}
-                            action={edit.bind(null, v.id)}
+                            action={edit.bind(null, s.id)}
                           />
                           <ToastForm<null>
-                            action={archive.bind(null, v.id)}
-                            successMessage="Vendor archived"
+                            action={archive.bind(null, s.id)}
+                            successMessage="Subscription archived"
                           >
                             <Button variant="ghost" size="sm" type="submit">
                               <Trash2 className="size-3.5" />

@@ -5,7 +5,7 @@ export const ExpenseInput = z.object({
   amount: z.number().int().positive("Amount must be positive"),
   date: z.coerce.date(),
   categoryId: z.string().min(1, "Category is required"),
-  vendorId: z.string().optional().or(z.literal("")),
+  subscriptionId: z.string().optional().or(z.literal("")),
   currency: z.string().default("INR"),
   paymentMethod: z.string().optional().or(z.literal("")),
   reference: z.string().optional().or(z.literal("")),

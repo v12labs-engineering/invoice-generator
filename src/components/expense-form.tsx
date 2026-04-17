@@ -11,7 +11,7 @@ import { createExpense, updateExpense } from "@/lib/actions/expenses";
 import { Loader2 } from "lucide-react";
 
 type Category = { id: string; name: string };
-type Vendor = { id: string; name: string };
+type Subscription = { id: string; name: string };
 
 type ExpenseForEdit = {
   id: string;
@@ -19,7 +19,7 @@ type ExpenseForEdit = {
   amount: number;
   date: Date;
   categoryId: string;
-  vendorId: string | null;
+  subscriptionId: string | null;
   currency: string;
   paymentMethod: string | null;
   reference: string | null;
@@ -38,11 +38,11 @@ function toDateInputValue(date: Date): string {
 export function ExpenseForm({
   expense,
   categories,
-  vendors,
+  subscriptions,
 }: {
   expense?: ExpenseForEdit;
   categories: Category[];
-  vendors: Vendor[];
+  subscriptions: Subscription[];
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -59,7 +59,7 @@ export function ExpenseForm({
       amount: amountCents,
       date: fd.get("date"),
       categoryId: fd.get("categoryId"),
-      vendorId: fd.get("vendorId"),
+      subscriptionId: fd.get("subscriptionId"),
       currency: fd.get("currency") ?? "INR",
       paymentMethod: fd.get("paymentMethod"),
       reference: fd.get("reference"),
@@ -154,17 +154,17 @@ export function ExpenseForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="vendorId">Vendor</Label>
+        <Label htmlFor="subscriptionId">Subscription</Label>
         <select
-          id="vendorId"
-          name="vendorId"
-          defaultValue={expense?.vendorId ?? ""}
+          id="subscriptionId"
+          name="subscriptionId"
+          defaultValue={expense?.subscriptionId ?? ""}
           className={selectClass}
         >
-          <option value="">No vendor</option>
-          {vendors.map((v) => (
-            <option key={v.id} value={v.id}>
-              {v.name}
+          <option value="">None</option>
+          {subscriptions.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
             </option>
           ))}
         </select>

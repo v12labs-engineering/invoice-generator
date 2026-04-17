@@ -10,7 +10,7 @@ import { requireMembership } from "./_shared";
 
 export async function listExpenses(filters?: {
   categoryId?: string;
-  vendorId?: string;
+  subscriptionId?: string;
   from?: Date;
   to?: Date;
   search?: string;
@@ -19,7 +19,7 @@ export async function listExpenses(filters?: {
 
   const where: Prisma.ExpenseWhereInput = { businessId };
   if (filters?.categoryId) where.categoryId = filters.categoryId;
-  if (filters?.vendorId) where.vendorId = filters.vendorId;
+  if (filters?.subscriptionId) where.subscriptionId = filters.subscriptionId;
   if (filters?.from || filters?.to) {
     where.date = {
       ...(filters.from ? { gte: filters.from } : {}),
@@ -32,7 +32,7 @@ export async function listExpenses(filters?: {
 
   return db.expense.findMany({
     where,
-    include: { vendor: true, category: true, attachments: true },
+    include: { subscription: true, category: true, attachments: true },
     orderBy: { date: "desc" },
   });
 }
@@ -41,7 +41,7 @@ export async function getExpense(id: string) {
   const { businessId } = await requireMembership();
   return db.expense.findFirst({
     where: { id, businessId },
-    include: { vendor: true, category: true, attachments: true },
+    include: { subscription: true, category: true, attachments: true },
   });
 }
 
@@ -59,7 +59,7 @@ export async function createExpense(input: unknown): Promise<Result<{ id: string
         amount: parsed.data.amount,
         date: parsed.data.date,
         categoryId: parsed.data.categoryId,
-        vendorId: parsed.data.vendorId || null,
+        subscriptionId: parsed.data.subscriptionId || null,
         currency: parsed.data.currency,
         paymentMethod: parsed.data.paymentMethod || null,
         reference: parsed.data.reference || null,
@@ -87,7 +87,7 @@ export async function updateExpense(id: string, input: unknown): Promise<Result<
         amount: parsed.data.amount,
         date: parsed.data.date,
         categoryId: parsed.data.categoryId,
-        vendorId: parsed.data.vendorId || null,
+        subscriptionId: parsed.data.subscriptionId || null,
         currency: parsed.data.currency,
         paymentMethod: parsed.data.paymentMethod || null,
         reference: parsed.data.reference || null,
@@ -106,14 +106,12 @@ export async function updateExpense(id: string, input: unknown): Promise<Result<
 export async function deleteExpense(id: string): Promise<Result<null>> {
   const { businessId } = await requireMembership();
 
-  // Fetch expense with attachments to clean up storage
   const expense = await db.expense.findFirst({
     where: { id, businessId },
     include: { attachments: true },
   });
   if (!expense) return err("Not found");
 
-  // Clean up storage files
   if (expense.attachments.length > 0) {
     const storage = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -123,7 +121,7 @@ export async function deleteExpense(id: string): Promise<Result<null>> {
     const BUCKET = "expenses";
     const marker = `/${BUCKET}/`;
     const paths = expense.attachments
-      .map((a) => {
+      .map((a: { fileUrl: string }) => {
         const idx = a.fileUrl.indexOf(marker);
         return idx !== -1 ? a.fileUrl.slice(idx + marker.length) : null;
       })

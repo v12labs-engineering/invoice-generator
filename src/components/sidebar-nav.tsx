@@ -38,7 +38,7 @@ const sections: NavSection[] = [
     label: "Expenses",
     items: [
       { href: "/expenses", label: "Expenses", icon: Receipt },
-      { href: "/vendors", label: "Vendors", icon: Store },
+      { href: "/subscriptions", label: "Subscriptions", icon: Store },
     ],
   },
 ];

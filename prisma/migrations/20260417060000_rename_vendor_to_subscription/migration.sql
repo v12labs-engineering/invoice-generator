@@ -1,0 +1,4 @@
+-- Rename Vendor to Subscription at Prisma level only.
+-- The database table stays as "Vendor" via @@map("Vendor").
+-- The column stays as "vendorId" via @map("vendorId").
+-- No schema changes needed.

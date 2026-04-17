@@ -19,7 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-export type EditableVendor = {
+export type EditableSubscription = {
   id: string;
   name: string;
   email: string | null;
@@ -27,11 +27,11 @@ export type EditableVendor = {
   notes: string | null;
 };
 
-export function VendorEditDialog({
-  vendor,
+export function SubscriptionEditDialog({
+  subscription,
   action,
 }: {
-  vendor: EditableVendor;
+  subscription: EditableSubscription;
   action: (prev: Result<null> | null, formData: FormData) => Promise<Result<null>>;
 }) {
   const [open, setOpen] = useState(false);
@@ -48,8 +48,8 @@ export function VendorEditDialog({
       />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit vendor</DialogTitle>
-          <DialogDescription>Update {vendor.name}&apos;s details.</DialogDescription>
+          <DialogTitle>Edit subscription</DialogTitle>
+          <DialogDescription>Update {subscription.name}&apos;s details.</DialogDescription>
         </DialogHeader>
         <ToastForm<null>
           className="space-y-4"
@@ -58,37 +58,37 @@ export function VendorEditDialog({
             if (res.ok) setOpen(false);
             return res;
           }}
-          successMessage="Vendor updated"
+          successMessage="Subscription updated"
         >
           <div className="space-y-2">
-            <Label htmlFor={`name-${vendor.id}`}>Name</Label>
-            <Input id={`name-${vendor.id}`} name="name" required defaultValue={vendor.name} />
+            <Label htmlFor={`name-${subscription.id}`}>Name</Label>
+            <Input id={`name-${subscription.id}`} name="name" required defaultValue={subscription.name} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor={`email-${vendor.id}`}>Email</Label>
+            <Label htmlFor={`email-${subscription.id}`}>Email</Label>
             <Input
-              id={`email-${vendor.id}`}
+              id={`email-${subscription.id}`}
               name="email"
               type="email"
-              defaultValue={vendor.email ?? ""}
+              defaultValue={subscription.email ?? ""}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor={`addressLines-${vendor.id}`}>Address</Label>
+            <Label htmlFor={`addressLines-${subscription.id}`}>Address</Label>
             <Textarea
-              id={`addressLines-${vendor.id}`}
+              id={`addressLines-${subscription.id}`}
               name="addressLines"
               rows={2}
-              defaultValue={vendor.addressLines.join("\n")}
+              defaultValue={subscription.addressLines.join("\n")}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor={`notes-${vendor.id}`}>Notes</Label>
+            <Label htmlFor={`notes-${subscription.id}`}>Notes</Label>
             <Textarea
-              id={`notes-${vendor.id}`}
+              id={`notes-${subscription.id}`}
               name="notes"
               rows={2}
-              defaultValue={vendor.notes ?? ""}
+              defaultValue={subscription.notes ?? ""}
             />
           </div>
           <DialogFooter>

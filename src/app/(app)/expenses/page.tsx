@@ -26,7 +26,7 @@ export default async function ExpensesPage({
   const [expenses, { businessId }] = await Promise.all([
     listExpenses({
       categoryId: sp.category,
-      vendorId: sp.vendor,
+      subscriptionId: sp.subscription,
       search: sp.q,
     }),
     requireMembership(),
@@ -73,7 +73,7 @@ export default async function ExpensesPage({
               <TableRow>
                 <TableHead className="px-4">Date</TableHead>
                 <TableHead>Description</TableHead>
-                <TableHead>Vendor</TableHead>
+                <TableHead>Subscription</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
                 <TableHead className="w-10" />
@@ -94,7 +94,7 @@ export default async function ExpensesPage({
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     <Link href={`/expenses/${e.id}`} className="block">
-                      {e.vendor?.name ?? "—"}
+                      {e.subscription?.name ?? "—"}
                     </Link>
                   </TableCell>
                   <TableCell>
