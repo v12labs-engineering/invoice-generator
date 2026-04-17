@@ -34,6 +34,23 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 
+const selectClass =
+  "flex h-11 w-full rounded-lg border border-input bg-transparent px-3 text-base md:text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30";
+
+const CYCLES = [
+  { value: "WEEKLY", label: "Weekly" },
+  { value: "MONTHLY", label: "Monthly" },
+  { value: "QUARTERLY", label: "Quarterly" },
+  { value: "YEARLY", label: "Yearly" },
+] as const;
+
+const CYCLE_LABELS: Record<string, string> = {
+  WEEKLY: "Weekly",
+  MONTHLY: "Monthly",
+  QUARTERLY: "Quarterly",
+  YEARLY: "Yearly",
+};
+
 function parseCost(fd: FormData): number | undefined {
   const raw = String(fd.get("costDisplay") ?? "").trim();
   if (!raw) return undefined;
@@ -59,6 +76,7 @@ export default async function SubscriptionsPage() {
       name: formData.get("name"),
       url: formData.get("url"),
       cost: parseCost(formData),
+      cycle: formData.get("cycle"),
       notes: formData.get("notes"),
     });
   }
@@ -69,6 +87,7 @@ export default async function SubscriptionsPage() {
       name: formData.get("name"),
       url: formData.get("url"),
       cost: parseCost(formData),
+      cycle: formData.get("cycle"),
       notes: formData.get("notes"),
     });
   }
@@ -102,9 +121,19 @@ export default async function SubscriptionsPage() {
                 <Label htmlFor="url">URL</Label>
                 <Input id="url" name="url" type="url" placeholder="https://..." />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="costDisplay">Monthly cost</Label>
-                <Input id="costDisplay" name="costDisplay" type="number" step="0.01" min="0" placeholder="0.00" />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="costDisplay">Cost</Label>
+                  <Input id="costDisplay" name="costDisplay" type="number" step="0.01" min="0" placeholder="0.00" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cycle">Billing cycle</Label>
+                  <select id="cycle" name="cycle" defaultValue="MONTHLY" className={selectClass}>
+                    {CYCLES.map((c) => (
+                      <option key={c.value} value={c.value}>{c.label}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="notes">Notes</Label>
@@ -131,7 +160,8 @@ export default async function SubscriptionsPage() {
                 <TableHeader className="bg-muted/40">
                   <TableRow>
                     <TableHead className="px-4">Name</TableHead>
-                    <TableHead>Monthly cost</TableHead>
+                    <TableHead>Cost</TableHead>
+                    <TableHead>Cycle</TableHead>
                     <TableHead className="text-right">Expenses</TableHead>
                     <TableHead className="text-right">Total spent</TableHead>
                     <TableHead className="w-40" />
@@ -150,13 +180,16 @@ export default async function SubscriptionsPage() {
                           </a>
                         )}
                       </TableCell>
-                      <TableCell className="text-muted-foreground">
+                      <TableCell className="tabular-nums">
                         {s.cost != null ? formatMoney(s.cost, currency) : "—"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {CYCLE_LABELS[s.cycle] ?? s.cycle}
                       </TableCell>
                       <TableCell className="text-right text-muted-foreground">
                         {stats?._count ?? 0}
                       </TableCell>
-                      <TableCell className="text-right text-muted-foreground">
+                      <TableCell className="text-right tabular-nums">
                         {stats?._sum.amount != null
                           ? formatMoney(Number(stats._sum.amount), currency)
                           : "—"}
@@ -169,6 +202,7 @@ export default async function SubscriptionsPage() {
                               name: s.name,
                               url: s.url,
                               cost: s.cost,
+                              cycle: s.cycle,
                               notes: s.notes,
                             }}
                             action={edit.bind(null, s.id)}

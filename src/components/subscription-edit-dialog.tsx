@@ -19,11 +19,22 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
+const selectClass =
+  "flex h-11 w-full rounded-lg border border-input bg-transparent px-3 text-base md:text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30";
+
+const CYCLES = [
+  { value: "WEEKLY", label: "Weekly" },
+  { value: "MONTHLY", label: "Monthly" },
+  { value: "QUARTERLY", label: "Quarterly" },
+  { value: "YEARLY", label: "Yearly" },
+] as const;
+
 export type EditableSubscription = {
   id: string;
   name: string;
   url: string | null;
   cost: number | null;
+  cycle: string;
   notes: string | null;
 };
 
@@ -74,17 +85,32 @@ export function SubscriptionEditDialog({
               defaultValue={subscription.url ?? ""}
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor={`cost-${subscription.id}`}>Monthly cost</Label>
-            <Input
-              id={`cost-${subscription.id}`}
-              name="costDisplay"
-              type="number"
-              step="0.01"
-              min="0"
-              placeholder="0.00"
-              defaultValue={subscription.cost != null ? (subscription.cost / 100).toFixed(2) : ""}
-            />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor={`cost-${subscription.id}`}>Cost</Label>
+              <Input
+                id={`cost-${subscription.id}`}
+                name="costDisplay"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="0.00"
+                defaultValue={subscription.cost != null ? (subscription.cost / 100).toFixed(2) : ""}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`cycle-${subscription.id}`}>Billing cycle</Label>
+              <select
+                id={`cycle-${subscription.id}`}
+                name="cycle"
+                defaultValue={subscription.cycle}
+                className={selectClass}
+              >
+                {CYCLES.map((c) => (
+                  <option key={c.value} value={c.value}>{c.label}</option>
+                ))}
+              </select>
+            </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor={`notes-${subscription.id}`}>Notes</Label>

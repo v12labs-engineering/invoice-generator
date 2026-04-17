@@ -260,6 +260,7 @@ model Subscription {
   name         String
   url          String?
   cost         Int?
+  cycle        Cadence  @default(MONTHLY)
   notes        String?
   archivedAt   DateTime?
   expenses     Expense[]

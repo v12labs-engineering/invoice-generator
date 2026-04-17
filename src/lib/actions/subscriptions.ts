@@ -26,6 +26,7 @@ export async function createSubscription(input: unknown): Promise<Result<{ id: s
         name: parsed.data.name,
         url: parsed.data.url || null,
         cost: parsed.data.cost ?? null,
+        cycle: parsed.data.cycle,
         notes: parsed.data.notes || null,
       },
     });
@@ -49,6 +50,7 @@ export async function updateSubscription(id: string, input: unknown): Promise<Re
         name: parsed.data.name,
         url: parsed.data.url || null,
         cost: parsed.data.cost ?? null,
+        cycle: parsed.data.cycle,
         notes: parsed.data.notes || null,
       },
     });
