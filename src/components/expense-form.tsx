@@ -9,6 +9,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createExpense, updateExpense } from "@/lib/actions/expenses";
 import { Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Category = { id: string; name: string };
 type Subscription = { id: string; name: string };
@@ -25,9 +32,6 @@ type ExpenseForEdit = {
   reference: string | null;
   notes: string | null;
 };
-
-const selectClass =
-  "flex h-11 w-full rounded-lg border border-input bg-transparent px-3 text-base md:text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30";
 
 const PAYMENT_METHODS = ["UPI", "Bank", "Card", "Cash", "Other"] as const;
 
@@ -135,56 +139,46 @@ export function ExpenseForm({
 
       <div className="space-y-2">
         <Label htmlFor="categoryId">Category</Label>
-        <select
-          id="categoryId"
-          name="categoryId"
-          required
-          defaultValue={expense?.categoryId ?? ""}
-          className={selectClass}
-        >
-          <option value="" disabled>
-            Select a category
-          </option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
+        <Select name="categoryId" required defaultValue={expense?.categoryId ?? ""}>
+          <SelectTrigger id="categoryId" className="w-full h-11">
+            <SelectValue placeholder="Select a category" />
+          </SelectTrigger>
+          <SelectContent>
+            {categories.map((c) => (
+              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="subscriptionId">Subscription</Label>
-        <select
-          id="subscriptionId"
-          name="subscriptionId"
-          defaultValue={expense?.subscriptionId ?? ""}
-          className={selectClass}
-        >
-          <option value="">None</option>
-          {subscriptions.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name}
-            </option>
-          ))}
-        </select>
+        <Select name="subscriptionId" defaultValue={expense?.subscriptionId ?? ""}>
+          <SelectTrigger id="subscriptionId" className="w-full h-11">
+            <SelectValue placeholder="None" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">None</SelectItem>
+            {subscriptions.map((s) => (
+              <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="paymentMethod">Payment method</Label>
-        <select
-          id="paymentMethod"
-          name="paymentMethod"
-          defaultValue={expense?.paymentMethod ?? ""}
-          className={selectClass}
-        >
-          <option value="">Select method</option>
-          {PAYMENT_METHODS.map((m) => (
-            <option key={m} value={m}>
-              {m}
-            </option>
-          ))}
-        </select>
+        <Select name="paymentMethod" defaultValue={expense?.paymentMethod ?? ""}>
+          <SelectTrigger id="paymentMethod" className="w-full h-11">
+            <SelectValue placeholder="Select method" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Select method</SelectItem>
+            {PAYMENT_METHODS.map((m) => (
+              <SelectItem key={m} value={m}>{m}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2">

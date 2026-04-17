@@ -33,9 +33,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-
-const selectClass =
-  "flex h-11 w-full rounded-lg border border-input bg-transparent px-3 text-base md:text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const CYCLES = [
   { value: "WEEKLY", label: "Weekly" },
@@ -128,11 +132,16 @@ export default async function SubscriptionsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="cycle">Billing cycle</Label>
-                  <select id="cycle" name="cycle" defaultValue="MONTHLY" className={selectClass}>
-                    {CYCLES.map((c) => (
-                      <option key={c.value} value={c.value}>{c.label}</option>
-                    ))}
-                  </select>
+                  <Select name="cycle" defaultValue="MONTHLY">
+                    <SelectTrigger id="cycle" className="w-full h-11">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CYCLES.map((c) => (
+                        <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="space-y-2">

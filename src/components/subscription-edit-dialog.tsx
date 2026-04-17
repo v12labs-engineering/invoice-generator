@@ -10,6 +10,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { FormSubmitButton } from "@/components/form-submit-button";
 import { ToastForm } from "@/components/toast-form";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -18,9 +25,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
-const selectClass =
-  "flex h-11 w-full rounded-lg border border-input bg-transparent px-3 text-base md:text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30";
 
 const CYCLES = [
   { value: "WEEKLY", label: "Weekly" },
@@ -100,16 +104,16 @@ export function SubscriptionEditDialog({
             </div>
             <div className="space-y-2">
               <Label htmlFor={`cycle-${subscription.id}`}>Billing cycle</Label>
-              <select
-                id={`cycle-${subscription.id}`}
-                name="cycle"
-                defaultValue={subscription.cycle}
-                className={selectClass}
-              >
-                {CYCLES.map((c) => (
-                  <option key={c.value} value={c.value}>{c.label}</option>
-                ))}
-              </select>
+              <Select name="cycle" defaultValue={subscription.cycle}>
+                <SelectTrigger id={`cycle-${subscription.id}`} className="w-full h-11">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CYCLES.map((c) => (
+                    <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div className="space-y-2">

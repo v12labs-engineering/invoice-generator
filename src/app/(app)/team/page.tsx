@@ -14,6 +14,13 @@ import { Button } from "@/components/ui/button";
 import { FormSubmitButton } from "@/components/form-submit-button";
 import { ToastForm } from "@/components/toast-form";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -28,8 +35,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-const roleClass = "h-11 rounded-lg border border-input bg-transparent px-3 text-base md:text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30";
 
 export default async function TeamPage() {
   const res = await listTeam();
@@ -83,10 +88,15 @@ export default async function TeamPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="role">Role</Label>
-                <select id="role" name="role" defaultValue="MEMBER" className={roleClass}>
-                  <option value="MEMBER">Member</option>
-                  <option value="OWNER">Owner</option>
-                </select>
+                <Select name="role" defaultValue="MEMBER">
+                  <SelectTrigger id="role" className="w-full h-11">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="MEMBER">Member</SelectItem>
+                    <SelectItem value="OWNER">Owner</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <FormSubmitButton>
                 <MailPlus className="size-4" />

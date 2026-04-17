@@ -23,6 +23,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { FormSubmitButton } from "@/components/form-submit-button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { LogoUpload } from "@/components/logo-upload";
 import { TemplatePicker } from "@/components/template-picker";
 import dynamic from "next/dynamic";
@@ -41,9 +48,6 @@ type Line = {
   taxRate: number;
   sortOrder: number;
 };
-
-const selectClass =
-  "flex h-11 w-full rounded-lg border border-input bg-transparent px-3 text-base md:text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30";
 
 type TemplateId = "CLASSIC" | "MODERN" | "MINIMAL";
 
@@ -193,23 +197,21 @@ export function InvoiceForm({
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="clientId">Client</Label>
-                <select
-                  id="clientId"
+                <Select
                   name="clientId"
-                  className={selectClass}
                   required
                   value={clientId}
-                  onChange={(e) => setClientId(e.target.value)}
+                  onValueChange={(v) => setClientId(v ?? "")}
                 >
-                  <option value="" disabled>
-                    Select a client...
-                  </option>
-                  {clients.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger id="clientId" className="w-full h-11">
+                    <SelectValue placeholder="Select a client..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="issueDate">Issue date</Label>

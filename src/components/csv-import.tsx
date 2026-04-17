@@ -6,6 +6,21 @@ import { toast } from "sonner";
 import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { importExpenses } from "@/lib/actions/bulk-import";
 
 type ColumnKey = "date" | "description" | "amount" | "reference";
@@ -43,9 +58,6 @@ function parseCSV(text: string): { headers: string[]; rows: string[][] } {
   return { headers, rows };
 }
 
-const selectClass =
-  "flex h-11 w-full rounded-lg border border-input bg-transparent px-3 text-base md:text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30";
-
 export function CsvImport() {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -77,8 +89,8 @@ export function CsvImport() {
     reader.readAsText(file);
   }
 
-  function onMappingChange(key: ColumnKey, value: string) {
-    setMapping((prev) => ({ ...prev, [key]: parseInt(value, 10) }));
+  function onMappingChange(key: ColumnKey, value: string | null | undefined) {
+    setMapping((prev) => ({ ...prev, [key]: parseInt(value ?? "-1", 10) }));
   }
 
   function onImport() {
@@ -156,19 +168,20 @@ export function CsvImport() {
                       <span className="ml-1 text-destructive">*</span>
                     )}
                   </Label>
-                  <select
-                    id={`map-${key}`}
-                    value={mapping[key]}
-                    onChange={(e) => onMappingChange(key, e.target.value)}
-                    className={selectClass}
+                  <Select
+                    value={String(mapping[key])}
+                    onValueChange={(v) => onMappingChange(key, v)}
                   >
-                    <option value={-1}>— not mapped —</option>
-                    {headers.map((h, i) => (
-                      <option key={i} value={i}>
-                        {h}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger id={`map-${key}`} className="w-full h-11">
+                      <SelectValue placeholder="— not mapped —" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="-1">— not mapped —</SelectItem>
+                      {headers.map((h, i) => (
+                        <SelectItem key={i} value={String(i)}>{h}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               ))}
             </div>
@@ -180,38 +193,35 @@ export function CsvImport() {
                 Preview ({previewRows.length} of {rows.length} rows)
               </h3>
               <div className="overflow-x-auto rounded-lg border text-sm">
-                <table className="w-full">
-                  <thead className="bg-muted/40">
-                    <tr>
+                <Table>
+                  <TableHeader className="bg-muted/40">
+                    <TableRow>
                       {(["date", "description", "amount", "reference"] as ColumnKey[]).map((k) => (
-                        <th
-                          key={k}
-                          className="px-3 py-2 text-left font-medium text-muted-foreground"
-                        >
+                        <TableHead key={k} className="px-3">
                           {COLUMN_LABELS[k]}
-                        </th>
+                        </TableHead>
                       ))}
-                    </tr>
-                  </thead>
-                  <tbody>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {previewRows.map((row, ri) => (
-                      <tr key={ri} className="border-t">
-                        <td className="px-3 py-2 text-muted-foreground">
+                      <TableRow key={ri}>
+                        <TableCell className="px-3 text-muted-foreground">
                           {mapping.date >= 0 ? row[mapping.date] : "—"}
-                        </td>
-                        <td className="px-3 py-2">
+                        </TableCell>
+                        <TableCell className="px-3">
                           {mapping.description >= 0 ? row[mapping.description] : "—"}
-                        </td>
-                        <td className="px-3 py-2 tabular-nums">
+                        </TableCell>
+                        <TableCell className="px-3 tabular-nums">
                           {mapping.amount >= 0 ? row[mapping.amount] : "—"}
-                        </td>
-                        <td className="px-3 py-2 text-muted-foreground">
+                        </TableCell>
+                        <TableCell className="px-3 text-muted-foreground">
                           {mapping.reference >= 0 ? row[mapping.reference] : "—"}
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             </div>
           )}
