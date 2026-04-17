@@ -30,16 +30,21 @@ async function ensureDefaults(businessId: string) {
   const count = await db.expenseCategory.count({ where: { businessId } });
   if (count > 0) return;
 
-  await db.expenseCategory.createMany({
-    data: DEFAULT_CATEGORIES.map((name, i) => ({
-      businessId,
-      name,
-      slug: slugify(name),
-      isSystem: true,
-      isActive: true,
-      sortOrder: i,
-    })),
-  });
+  try {
+    await db.expenseCategory.createMany({
+      data: DEFAULT_CATEGORIES.map((name, i) => ({
+        businessId,
+        name,
+        slug: slugify(name),
+        isSystem: true,
+        isActive: true,
+        sortOrder: i,
+      })),
+      skipDuplicates: true,
+    });
+  } catch {
+    // Race condition: another request already seeded. Safe to ignore.
+  }
 }
 
 export async function listCategories() {

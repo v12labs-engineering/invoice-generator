@@ -1,9 +1,11 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 import { ExpenseInput } from "@/lib/schemas/expense";
 import { err, ok, type Result } from "@/lib/result";
 import { revalidatePath } from "next/cache";
+import { createClient } from "@supabase/supabase-js";
 import { requireMembership } from "./_shared";
 
 export async function listExpenses(filters?: {
@@ -15,7 +17,7 @@ export async function listExpenses(filters?: {
 }) {
   const { businessId } = await requireMembership();
 
-  const where: Record<string, unknown> = { businessId };
+  const where: Prisma.ExpenseWhereInput = { businessId };
   if (filters?.categoryId) where.categoryId = filters.categoryId;
   if (filters?.vendorId) where.vendorId = filters.vendorId;
   if (filters?.from || filters?.to) {
@@ -103,9 +105,36 @@ export async function updateExpense(id: string, input: unknown): Promise<Result<
 
 export async function deleteExpense(id: string): Promise<Result<null>> {
   const { businessId } = await requireMembership();
+
+  // Fetch expense with attachments to clean up storage
+  const expense = await db.expense.findFirst({
+    where: { id, businessId },
+    include: { attachments: true },
+  });
+  if (!expense) return err("Not found");
+
+  // Clean up storage files
+  if (expense.attachments.length > 0) {
+    const storage = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SECRET_KEY!,
+      { auth: { persistSession: false } },
+    );
+    const BUCKET = "expenses";
+    const marker = `/${BUCKET}/`;
+    const paths = expense.attachments
+      .map((a) => {
+        const idx = a.fileUrl.indexOf(marker);
+        return idx !== -1 ? a.fileUrl.slice(idx + marker.length) : null;
+      })
+      .filter((p): p is string => p !== null);
+    if (paths.length > 0) {
+      await storage.storage.from(BUCKET).remove(paths);
+    }
+  }
+
   try {
-    const result = await db.expense.deleteMany({ where: { id, businessId } });
-    if (result.count === 0) return err("Not found");
+    await db.expense.delete({ where: { id } });
     revalidatePath("/expenses");
     revalidatePath("/dashboard");
     return ok(null);

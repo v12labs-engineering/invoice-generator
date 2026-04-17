@@ -5,6 +5,8 @@ import {
   archiveVendor,
   updateVendor,
 } from "@/lib/actions/vendors";
+import { db } from "@/lib/db";
+import { requireMembership } from "@/lib/actions/_shared";
 import type { Result } from "@/lib/result";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,7 +34,15 @@ import {
 import { Button } from "@/components/ui/button";
 
 export default async function VendorsPage() {
-  const vendors = await listVendors();
+  const [vendors, { businessId }] = await Promise.all([listVendors(), requireMembership()]);
+
+  const rawStats = await db.expense.groupBy({
+    by: ["vendorId"],
+    where: { businessId, vendorId: { not: null } },
+    _count: true,
+    _sum: { amount: true },
+  });
+  const statsMap = new Map(rawStats.map((s) => [s.vendorId!, s]));
 
   async function add(_prev: Result<{ id: string }> | null, formData: FormData) {
     "use server";
@@ -119,14 +129,26 @@ export default async function VendorsPage() {
                   <TableRow>
                     <TableHead className="px-4">Name</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead className="text-right">Expenses</TableHead>
+                    <TableHead className="text-right">Total spent</TableHead>
                     <TableHead className="w-40" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {vendors.map((v) => (
+                  {vendors.map((v) => {
+                    const stats = statsMap.get(v.id);
+                    return (
                     <TableRow key={v.id}>
                       <TableCell className="px-4 font-medium">{v.name}</TableCell>
                       <TableCell className="text-muted-foreground">{v.email ?? "—"}</TableCell>
+                      <TableCell className="text-right text-muted-foreground">
+                        {stats?._count ?? 0}
+                      </TableCell>
+                      <TableCell className="text-right text-muted-foreground">
+                        {stats?._sum.amount != null
+                          ? `$${Number(stats._sum.amount).toFixed(2)}`
+                          : "—"}
+                      </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
                           <VendorEditDialog
@@ -151,7 +173,8 @@ export default async function VendorsPage() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  );
+                  })}
                 </TableBody>
               </Table>
             </div>
