@@ -1,9 +1,10 @@
-import { Plus, Trash2, Store } from "lucide-react";
+import { Plus, Trash2, Store, Pause, Play } from "lucide-react";
 import {
   listSubscriptions,
   createSubscription,
   archiveSubscription,
   updateSubscription,
+  toggleSubscription,
 } from "@/lib/actions/subscriptions";
 import { db } from "@/lib/db";
 import { requireMembership } from "@/lib/actions/_shared";
@@ -81,6 +82,7 @@ export default async function SubscriptionsPage() {
       url: formData.get("url"),
       cost: parseCost(formData),
       cycle: formData.get("cycle"),
+      startDate: formData.get("startDate"),
       notes: formData.get("notes"),
     });
   }
@@ -96,20 +98,27 @@ export default async function SubscriptionsPage() {
     });
   }
 
+  async function toggle(id: string, _prev: Result<null> | null, _fd: FormData) {
+    "use server";
+    return toggleSubscription(id);
+  }
+
   async function archive(id: string, _prev: Result<null> | null, _fd: FormData) {
     "use server";
     return archiveSubscription(id);
   }
 
+  const today = new Date().toISOString().slice(0, 10);
+
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
-      <PageHeader title="Subscriptions" description="Track your recurring services and tools." />
+      <PageHeader title="Subscriptions" description="Recurring services that auto-generate expenses on their billing cycle." />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         <Card>
           <CardHeader>
             <CardTitle>Add subscription</CardTitle>
-            <CardDescription>Track a new service or tool.</CardDescription>
+            <CardDescription>Track a recurring service. Expenses are created automatically.</CardDescription>
           </CardHeader>
           <CardContent>
             <ToastForm<{ id: string }>
@@ -128,7 +137,7 @@ export default async function SubscriptionsPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="costDisplay">Cost</Label>
-                  <Input id="costDisplay" name="costDisplay" type="number" step="0.01" min="0" placeholder="0.00" />
+                  <Input id="costDisplay" name="costDisplay" type="number" step="0.01" min="0" placeholder="0.00" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="cycle">Billing cycle</Label>
@@ -143,6 +152,10 @@ export default async function SubscriptionsPage() {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="startDate">First billing date</Label>
+                <Input id="startDate" name="startDate" type="date" required defaultValue={today} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="notes">Notes</Label>
@@ -161,7 +174,7 @@ export default async function SubscriptionsPage() {
             <EmptyState
               icon={Store}
               title="No subscriptions yet"
-              description="Add your first subscription using the form on the left."
+              description="Add a subscription and expenses will be created automatically."
             />
           ) : (
             <div className="overflow-x-auto rounded-lg border bg-card">
@@ -171,9 +184,9 @@ export default async function SubscriptionsPage() {
                     <TableHead className="px-4">Name</TableHead>
                     <TableHead>Cost</TableHead>
                     <TableHead>Cycle</TableHead>
-                    <TableHead className="text-right">Expenses</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead className="text-right">Total spent</TableHead>
-                    <TableHead className="w-40" />
+                    <TableHead className="w-48" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -195,8 +208,10 @@ export default async function SubscriptionsPage() {
                       <TableCell className="text-muted-foreground">
                         {CYCLE_LABELS[s.cycle] ?? s.cycle}
                       </TableCell>
-                      <TableCell className="text-right text-muted-foreground">
-                        {stats?._count ?? 0}
+                      <TableCell>
+                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${s.active ? "bg-emerald-500/10 text-emerald-600" : "bg-muted text-muted-foreground"}`}>
+                          {s.active ? "Active" : "Paused"}
+                        </span>
                       </TableCell>
                       <TableCell className="text-right tabular-nums">
                         {stats?._sum.amount != null
@@ -205,6 +220,15 @@ export default async function SubscriptionsPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
+                          <ToastForm<null>
+                            action={toggle.bind(null, s.id)}
+                            successMessage={s.active ? "Paused" : "Resumed"}
+                          >
+                            <Button variant="ghost" size="sm" type="submit">
+                              {s.active ? <Pause className="size-3.5" /> : <Play className="size-3.5" />}
+                              {s.active ? "Pause" : "Resume"}
+                            </Button>
+                          </ToastForm>
                           <SubscriptionEditDialog
                             subscription={{
                               id: s.id,
@@ -222,7 +246,6 @@ export default async function SubscriptionsPage() {
                           >
                             <Button variant="ghost" size="sm" type="submit">
                               <Trash2 className="size-3.5" />
-                              Archive
                             </Button>
                           </ToastForm>
                         </div>

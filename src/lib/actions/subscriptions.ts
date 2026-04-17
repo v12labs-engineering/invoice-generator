@@ -19,6 +19,8 @@ export async function createSubscription(input: unknown): Promise<Result<{ id: s
   const parsed = SubscriptionInput.safeParse(input);
   if (!parsed.success) return err(parsed.error.issues[0]?.message ?? "Invalid input");
 
+  const startDate = parsed.data.startDate ?? new Date();
+
   try {
     const subscription = await db.subscription.create({
       data: {
@@ -27,6 +29,9 @@ export async function createSubscription(input: unknown): Promise<Result<{ id: s
         url: parsed.data.url || null,
         cost: parsed.data.cost ?? null,
         cycle: parsed.data.cycle,
+        startDate,
+        nextRunAt: parsed.data.cost ? startDate : null,
+        active: parsed.data.active,
         notes: parsed.data.notes || null,
       },
     });
@@ -63,12 +68,25 @@ export async function updateSubscription(id: string, input: unknown): Promise<Re
   }
 }
 
+export async function toggleSubscription(id: string): Promise<Result<null>> {
+  const { businessId } = await requireMembership();
+  const sub = await db.subscription.findFirst({ where: { id, businessId } });
+  if (!sub) return err("Not found");
+
+  await db.subscription.update({
+    where: { id },
+    data: { active: !sub.active },
+  });
+  revalidatePath("/subscriptions");
+  return ok(null);
+}
+
 export async function archiveSubscription(id: string): Promise<Result<null>> {
   const { businessId } = await requireMembership();
   try {
     const result = await db.subscription.updateMany({
       where: { id, businessId },
-      data: { archivedAt: new Date() },
+      data: { archivedAt: new Date(), active: false },
     });
     if (result.count === 0) return err("Not found");
     revalidatePath("/subscriptions");

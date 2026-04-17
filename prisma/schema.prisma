@@ -260,7 +260,11 @@ model Subscription {
   name         String
   url          String?
   cost         Int?
-  cycle        Cadence  @default(MONTHLY)
+  cycle        Cadence   @default(MONTHLY)
+  startDate    DateTime  @default(now())
+  nextRunAt    DateTime?
+  lastRunAt    DateTime?
+  active       Boolean   @default(true)
   notes        String?
   archivedAt   DateTime?
   expenses     Expense[]
@@ -268,6 +272,7 @@ model Subscription {
   updatedAt    DateTime  @default(now()) @updatedAt
   @@unique([businessId, name])
   @@map("Vendor")
+  @@index([businessId, active, nextRunAt])
   @@index([businessId, archivedAt])
 }
 

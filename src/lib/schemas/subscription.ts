@@ -5,6 +5,8 @@ export const SubscriptionInput = z.object({
   url: z.string().url().optional().or(z.literal("")),
   cost: z.number().int().nonnegative().optional(),
   cycle: z.enum(["WEEKLY", "MONTHLY", "QUARTERLY", "YEARLY"]).default("MONTHLY"),
+  startDate: z.coerce.date().optional(),
+  active: z.boolean().default(true),
   notes: z.string().optional().or(z.literal("")),
 });
 

@@ -21,6 +21,8 @@ async function handle(req: Request) {
   }
 
   const now = new Date();
+
+  // ── Recurring invoices ──
   const due = await db.recurringSchedule.findMany({
     where: {
       active: true,
@@ -29,7 +31,7 @@ async function handle(req: Request) {
     },
   });
 
-  let processed = 0;
+  let invoicesProcessed = 0;
   for (const s of due) {
     const tpl = s.templateJson as unknown as Tpl;
     const totals = calcInvoiceTotals(tpl.lines, 0);
@@ -72,10 +74,71 @@ async function handle(req: Request) {
         nextRunAt: advanceNextRunAt(s.nextRunAt, s.cadence as Cadence, s.intervalCount),
       },
     });
-    processed++;
+    invoicesProcessed++;
   }
 
-  return Response.json({ processed });
+  // ── Recurring subscription expenses ──
+  const dueSubs = await db.subscription.findMany({
+    where: {
+      active: true,
+      archivedAt: null,
+      cost: { not: null },
+      nextRunAt: { lte: now },
+    },
+  });
+
+  let expensesProcessed = 0;
+  for (const sub of dueSubs) {
+    if (!sub.cost) continue;
+
+    // Find or seed the SaaS & Software category for this business
+    let category = await db.expenseCategory.findFirst({
+      where: { businessId: sub.businessId, slug: "saas-software" },
+    });
+    if (!category) {
+      category = await db.expenseCategory.create({
+        data: {
+          businessId: sub.businessId,
+          name: "SaaS & Software",
+          slug: "saas-software",
+          isSystem: true,
+        },
+      });
+    }
+
+    // Find any member of this business to use as createdByUserId
+    const membership = await db.membership.findFirst({
+      where: { businessId: sub.businessId },
+    });
+    if (!membership) continue;
+
+    await db.expense.create({
+      data: {
+        businessId: sub.businessId,
+        createdByUserId: membership.userId,
+        subscriptionId: sub.id,
+        categoryId: category.id,
+        description: `${sub.name} — ${sub.cycle.toLowerCase()} subscription`,
+        amount: sub.cost,
+        date: now,
+        currency: "INR",
+      },
+    });
+
+    await db.subscription.update({
+      where: { id: sub.id },
+      data: {
+        lastRunAt: now,
+        nextRunAt: advanceNextRunAt(sub.nextRunAt!, sub.cycle as Cadence, 1),
+      },
+    });
+    expensesProcessed++;
+  }
+
+  return Response.json({
+    invoicesProcessed,
+    expensesProcessed,
+  });
 }
 
 export const GET = handle;
