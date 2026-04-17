@@ -17,6 +17,8 @@ model User {
   memberships   Membership[]
   invitesSent   Invite[]    @relation("invitedBy")
   invoices      Invoice[]
+  expenses      Expense[]
+  bulkImports   BulkImport[]
   createdAt     DateTime  @default(now())
 }
 
@@ -77,6 +79,10 @@ model Business {
   products          Product[]
   invoices          Invoice[]
   schedules         RecurringSchedule[]
+  vendors           Vendor[]
+  expenseCategories ExpenseCategory[]
+  expenses          Expense[]
+  bulkImports       BulkImport[]
   createdAt         DateTime @default(now())
   updatedAt         DateTime @default(now()) @updatedAt
 }
@@ -245,4 +251,89 @@ model RecurringSchedule {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   @@index([businessId, active, nextRunAt])
+}
+
+model Vendor {
+  id           String    @id @default(cuid())
+  businessId   String
+  business     Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name         String
+  email        String?
+  addressLines String[]
+  notes        String?
+  archivedAt   DateTime?
+  expenses     Expense[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now()) @updatedAt
+  @@unique([businessId, name])
+  @@index([businessId, archivedAt])
+}
+
+model ExpenseCategory {
+  id         String    @id @default(cuid())
+  businessId String
+  business   Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name       String
+  slug       String
+  isSystem   Boolean   @default(false)
+  isActive   Boolean   @default(true)
+  sortOrder  Int       @default(0)
+  expenses   Expense[]
+  createdAt  DateTime  @default(now())
+  @@unique([businessId, slug])
+  @@index([businessId, isActive])
+}
+
+model Expense {
+  id              String    @id @default(cuid())
+  businessId      String
+  business        Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  vendorId        String?
+  vendor          Vendor?   @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  categoryId      String
+  category        ExpenseCategory @relation(fields: [categoryId], references: [id])
+  createdByUserId String
+  createdByUser   User      @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+  description     String
+  date            DateTime
+  amount          Int
+  currency        String    @default("INR")
+  paymentMethod   String?
+  reference       String?
+  notes           String?
+  attachments     ExpenseAttachment[]
+  bulkImportId    String?
+  bulkImport      BulkImport? @relation(fields: [bulkImportId], references: [id], onDelete: SetNull)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now()) @updatedAt
+  @@index([businessId, date])
+  @@index([businessId, categoryId])
+  @@index([businessId, vendorId])
+}
+
+model ExpenseAttachment {
+  id         String   @id @default(cuid())
+  expenseId  String
+  expense    Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  fileName   String
+  fileUrl    String
+  fileType   String
+  fileSize   Int
+  uploadedAt DateTime @default(now())
+  @@index([expenseId])
+}
+
+model BulkImport {
+  id            String   @id @default(cuid())
+  businessId    String
+  business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  fileName      String
+  rowCount      Int
+  importedCount Int
+  skippedCount  Int
+  errorLog      Json?
+  expenses      Expense[]
+  importedAt    DateTime @default(now())
 }
