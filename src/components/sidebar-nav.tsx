@@ -5,28 +5,23 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  FileText,
   Users,
-  Package,
-  Repeat,
   Receipt,
-  Store,
   Briefcase,
-  UserCircle,
   Target,
-  FileSignature,
   BadgeCheck,
-  CalendarDays,
-  FileBox,
   ChevronRight,
+  type LucideIcon,
 } from "lucide-react";
 import {
   SidebarGroup,
-  SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import {
   Collapsible,
@@ -34,8 +29,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-type NavItem = { href: string; label: string; icon: typeof LayoutDashboard };
-type NavSection = { label: string; items: NavItem[] };
+type NavItem = { href: string; label: string; icon?: LucideIcon };
+type NavSection = { label: string; icon: LucideIcon; items: NavItem[] };
 
 const pinned: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -44,45 +39,50 @@ const pinned: NavItem[] = [
 const sections: NavSection[] = [
   {
     label: "Sales",
+    icon: Target,
     items: [
-      { href: "/deals", label: "Deals", icon: Target },
-      { href: "/quotes", label: "Quotes", icon: FileSignature },
-      { href: "/invoices", label: "Invoices", icon: FileText },
-      { href: "/recurring", label: "Recurring", icon: Repeat },
+      { href: "/deals", label: "Deals" },
+      { href: "/quotes", label: "Quotes" },
+      { href: "/invoices", label: "Invoices" },
+      { href: "/recurring", label: "Recurring" },
     ],
   },
   {
     label: "Customers",
+    icon: Users,
     items: [
-      { href: "/clients", label: "Clients", icon: Users },
-      { href: "/contacts", label: "Contacts", icon: UserCircle },
+      { href: "/clients", label: "Clients" },
+      { href: "/contacts", label: "Contacts" },
     ],
   },
   {
     label: "Work",
+    icon: Briefcase,
     items: [
-      { href: "/projects", label: "Projects", icon: Briefcase },
-      { href: "/products", label: "Products", icon: Package },
+      { href: "/projects", label: "Projects" },
+      { href: "/products", label: "Products" },
     ],
   },
   {
     label: "Expenses",
+    icon: Receipt,
     items: [
-      { href: "/expenses", label: "Expenses", icon: Receipt },
-      { href: "/subscriptions", label: "Subscriptions", icon: Store },
+      { href: "/expenses", label: "Expenses" },
+      { href: "/subscriptions", label: "Subscriptions" },
     ],
   },
   {
     label: "People",
+    icon: BadgeCheck,
     items: [
-      { href: "/employees", label: "Employees", icon: BadgeCheck },
-      { href: "/time-off", label: "Time off", icon: CalendarDays },
-      { href: "/documents", label: "Documents", icon: FileBox },
+      { href: "/employees", label: "Employees" },
+      { href: "/time-off", label: "Time off" },
+      { href: "/documents", label: "Documents" },
     ],
   },
 ];
 
-const STORAGE_KEY = "sidebar:open-sections:v2";
+const STORAGE_KEY = "sidebar:open-sections:v3";
 
 function loadOpen(): Set<string> | null {
   if (typeof window === "undefined") return null;
@@ -109,14 +109,12 @@ export function SidebarNav() {
 
   const activeSection = sections.find((s) => s.items.some((i) => isActive(i.href)))?.label;
 
-  // Default state: only the active section is open. User overrides persist.
   const [open, setOpen] = useState<Set<string>>(() => new Set());
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     const stored = loadOpen();
     if (stored) {
-      // Always force-open the active section even if user previously closed it.
       if (activeSection) stored.add(activeSection);
       setOpen(stored);
     } else {
@@ -125,10 +123,10 @@ export function SidebarNav() {
     setHydrated(true);
   }, [activeSection]);
 
-  function toggle(label: string, isOpen: boolean) {
+  function toggle(label: string, v: boolean) {
     setOpen((prev) => {
       const next = new Set(prev);
-      if (isOpen) next.add(label);
+      if (v) next.add(label);
       else next.delete(label);
       saveOpen(next);
       return next;
@@ -141,62 +139,61 @@ export function SidebarNav() {
   }
 
   return (
-    <SidebarGroup className="py-0">
-      <SidebarGroupContent>
-        <SidebarMenu>
-          {pinned.map((item) => {
-            const Icon = item.icon;
-            return (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton
-                  isActive={isActive(item.href)}
-                  tooltip={item.label}
-                  render={<Link href={item.href} />}
-                >
-                  <Icon />
-                  <span>{item.label}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            );
-          })}
-        </SidebarMenu>
+    <SidebarGroup>
+      <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+      <SidebarMenu>
+        {pinned.map((item) => {
+          const Icon = item.icon;
+          return (
+            <SidebarMenuItem key={item.href}>
+              <SidebarMenuButton
+                isActive={isActive(item.href)}
+                tooltip={item.label}
+                render={<Link href={item.href} />}
+              >
+                {Icon && <Icon />}
+                <span>{item.label}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          );
+        })}
 
-        {sections.map((section) => (
-          <Collapsible
-            key={section.label}
-            open={isOpen(section.label)}
-            onOpenChange={(v) => toggle(section.label, v)}
-            className="group/collapsible"
-          >
-            <CollapsibleTrigger asChild>
-              <SidebarGroupLabel className="mt-2 flex w-full cursor-pointer items-center justify-between pr-1 hover:text-sidebar-foreground">
-                <span>{section.label}</span>
-                <ChevronRight className="size-3.5 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-              </SidebarGroupLabel>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-              <SidebarMenu>
-                {section.items.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton
-                        isActive={isActive(item.href)}
-                        tooltip={item.label}
-                        render={<Link href={item.href} />}
-                      >
-                        <Icon />
-                        <span>{item.label}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </CollapsibleContent>
-          </Collapsible>
-        ))}
-      </SidebarGroupContent>
+        {sections.map((section) => {
+          const SectionIcon = section.icon;
+          return (
+            <Collapsible
+              key={section.label}
+              open={isOpen(section.label)}
+              onOpenChange={(v) => toggle(section.label, v)}
+              className="group/collapsible"
+            >
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton tooltip={section.label}>
+                    <SectionIcon />
+                    <span>{section.label}</span>
+                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    {section.items.map((item) => (
+                      <SidebarMenuSubItem key={item.href}>
+                        <SidebarMenuSubButton
+                          isActive={isActive(item.href)}
+                          render={<Link href={item.href} />}
+                        >
+                          <span>{item.label}</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
+          );
+        })}
+      </SidebarMenu>
     </SidebarGroup>
   );
 }
-
