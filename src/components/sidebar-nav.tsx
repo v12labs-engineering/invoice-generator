@@ -12,6 +12,13 @@ import {
   UsersRound,
   Receipt,
   Store,
+  Briefcase,
+  UserCircle,
+  Target,
+  FileSignature,
+  BadgeCheck,
+  CalendarDays,
+  FileBox,
 } from "lucide-react";
 import {
   SidebarMenu,
@@ -25,13 +32,30 @@ type NavSection = { label: string; items: NavItem[] };
 
 const sections: NavSection[] = [
   {
-    label: "Income",
+    label: "Overview",
+    items: [{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }],
+  },
+  {
+    label: "Sales",
     items: [
-      { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/deals", label: "Deals", icon: Target },
+      { href: "/quotes", label: "Quotes", icon: FileSignature },
       { href: "/invoices", label: "Invoices", icon: FileText },
-      { href: "/clients", label: "Clients", icon: Users },
-      { href: "/products", label: "Products", icon: Package },
       { href: "/recurring", label: "Recurring", icon: Repeat },
+    ],
+  },
+  {
+    label: "Customers",
+    items: [
+      { href: "/clients", label: "Clients", icon: Users },
+      { href: "/contacts", label: "Contacts", icon: UserCircle },
+    ],
+  },
+  {
+    label: "Work",
+    items: [
+      { href: "/projects", label: "Projects", icon: Briefcase },
+      { href: "/products", label: "Products", icon: Package },
     ],
   },
   {
@@ -39,6 +63,14 @@ const sections: NavSection[] = [
     items: [
       { href: "/expenses", label: "Expenses", icon: Receipt },
       { href: "/subscriptions", label: "Subscriptions", icon: Store },
+    ],
+  },
+  {
+    label: "People",
+    items: [
+      { href: "/employees", label: "Employees", icon: BadgeCheck },
+      { href: "/time-off", label: "Time off", icon: CalendarDays },
+      { href: "/documents", label: "Documents", icon: FileBox },
     ],
   },
 ];

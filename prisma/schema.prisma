@@ -19,6 +19,8 @@ model User {
   invoices      Invoice[]
   expenses      Expense[]
   bulkImports   BulkImport[]
+  timeEntries   TimeEntry[]
+  uploadedDocs  Document[]
   createdAt     DateTime  @default(now())
 }
 
@@ -83,6 +85,14 @@ model Business {
   expenseCategories ExpenseCategory[]
   expenses          Expense[]
   bulkImports       BulkImport[]
+  projects          Project[]
+  timeEntries       TimeEntry[]
+  contacts          Contact[]
+  deals             Deal[]
+  quotes            Quote[]
+  employees         Employee[]
+  timeOffRequests   TimeOffRequest[]
+  documents         Document[]
   createdAt         DateTime @default(now())
   updatedAt         DateTime @default(now()) @updatedAt
 }
@@ -125,6 +135,10 @@ model Client {
   archivedAt   DateTime?
   invoices     Invoice[]
   schedules    RecurringSchedule[]
+  projects     Project[]
+  contacts     Contact[]
+  deals        Deal[]
+  quotes       Quote[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @default(now()) @updatedAt
   @@index([businessId])
@@ -208,6 +222,7 @@ model InvoiceLine {
   taxRate      Int     @default(0)
   lineTotal    Int
   sortOrder    Int
+  timeEntries  TimeEntry[]
   @@index([invoiceId])
 }
 
@@ -343,4 +358,278 @@ model BulkImport {
   errorLog      Json?
   expenses      Expense[]
   importedAt    DateTime @default(now())
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  ARCHIVED
+}
+
+model Project {
+  id             String        @id @default(cuid())
+  businessId     String
+  business       Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  clientId       String?
+  client         Client?       @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  name           String
+  description    String?
+  status         ProjectStatus @default(ACTIVE)
+  hourlyRate     Int?
+  currency       String        @default("USD")
+  budgetAmount   Int?
+  budgetHours    Int?
+  startDate      DateTime?
+  endDate        DateTime?
+  archivedAt     DateTime?
+  timeEntries    TimeEntry[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @default(now()) @updatedAt
+  @@index([businessId, status])
+  @@index([businessId, clientId])
+}
+
+model TimeEntry {
+  id             String       @id @default(cuid())
+  businessId     String
+  business       Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  projectId      String
+  project        Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date           DateTime
+  minutes        Int
+  description    String
+  billable       Boolean      @default(true)
+  hourlyRate     Int?
+  invoiceLineId  String?
+  invoiceLine    InvoiceLine? @relation(fields: [invoiceLineId], references: [id], onDelete: SetNull)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @default(now()) @updatedAt
+  @@index([businessId, projectId, date])
+  @@index([businessId, invoiceLineId])
+  @@index([userId])
+}
+
+model Contact {
+  id         String    @id @default(cuid())
+  businessId String
+  business   Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  clientId   String?
+  client     Client?   @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  name       String
+  email      String?
+  phone      String?
+  title      String?
+  notes      String?
+  archivedAt DateTime?
+  deals      Deal[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @default(now()) @updatedAt
+  @@index([businessId, clientId])
+  @@index([businessId, archivedAt])
+}
+
+enum DealStage {
+  LEAD
+  QUALIFIED
+  PROPOSAL
+  NEGOTIATION
+  WON
+  LOST
+}
+
+model Deal {
+  id           String    @id @default(cuid())
+  businessId   String
+  business     Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  clientId     String?
+  client       Client?   @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  contactId    String?
+  contact      Contact?  @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  title        String
+  stage        DealStage @default(LEAD)
+  value        Int?
+  currency     String    @default("USD")
+  probability  Int       @default(0)
+  expectedAt   DateTime?
+  closedAt     DateTime?
+  notes        String?
+  quotes       Quote[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now()) @updatedAt
+  @@index([businessId, stage])
+  @@index([businessId, clientId])
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+model Quote {
+  id             String       @id @default(cuid())
+  businessId     String
+  business       Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  clientId       String
+  client         Client       @relation(fields: [clientId], references: [id])
+  dealId         String?
+  deal           Deal?        @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  number         String?
+  issueDate      DateTime
+  expiryDate     DateTime?
+  currency       String
+  status         QuoteStatus  @default(DRAFT)
+  subtotal       Int
+  discountAmount Int          @default(0)
+  taxAmount      Int          @default(0)
+  total          Int
+  notes          String?
+  terms          String?
+  convertedInvoiceId String?
+  lines          QuoteLine[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @default(now()) @updatedAt
+  @@unique([businessId, number])
+  @@index([businessId, status])
+  @@index([businessId, clientId])
+}
+
+model QuoteLine {
+  id           String  @id @default(cuid())
+  quoteId      String
+  quote        Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  productId    String?
+  description  String
+  quantity     Int
+  unitPrice    Int
+  lineDiscount Int     @default(0)
+  taxRate      Int     @default(0)
+  lineTotal    Int
+  sortOrder    Int
+  @@index([quoteId])
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACTOR
+  INTERN
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  ONBOARDING
+  ON_LEAVE
+  TERMINATED
+}
+
+model Employee {
+  id              String           @id @default(cuid())
+  businessId      String
+  business        Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  firstName       String
+  lastName        String
+  email           String
+  phone           String?
+  title           String?
+  department      String?
+  employmentType  EmploymentType   @default(FULL_TIME)
+  status          EmployeeStatus   @default(ONBOARDING)
+  startDate       DateTime
+  endDate         DateTime?
+  salaryAmount    Int?
+  salaryCurrency  String           @default("USD")
+  ptoBalanceDays  Int              @default(0)
+  managerId       String?
+  manager         Employee?        @relation("EmployeeManager", fields: [managerId], references: [id], onDelete: SetNull)
+  reports         Employee[]       @relation("EmployeeManager")
+  onboardingTasks OnboardingTask[]
+  timeOffRequests TimeOffRequest[]
+  documents       Document[]
+  notes           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now()) @updatedAt
+  @@unique([businessId, email])
+  @@index([businessId, status])
+  @@index([businessId, managerId])
+}
+
+model OnboardingTask {
+  id          String    @id @default(cuid())
+  employeeId  String
+  employee    Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  completedAt DateTime?
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  @@index([employeeId])
+}
+
+enum TimeOffType {
+  VACATION
+  SICK
+  PERSONAL
+  UNPAID
+  OTHER
+}
+
+enum TimeOffStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model TimeOffRequest {
+  id          String         @id @default(cuid())
+  businessId  String
+  business    Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  employeeId  String
+  employee    Employee       @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  type        TimeOffType    @default(VACATION)
+  startDate   DateTime
+  endDate     DateTime
+  days        Int
+  reason      String?
+  status      TimeOffStatus  @default(PENDING)
+  decidedAt   DateTime?
+  decidedById String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @default(now()) @updatedAt
+  @@index([businessId, status])
+  @@index([employeeId])
+}
+
+enum DocumentCategory {
+  CONTRACT
+  POLICY
+  TAX
+  ID
+  OTHER
+}
+
+model Document {
+  id             String           @id @default(cuid())
+  businessId     String
+  business       Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  employeeId     String?
+  employee       Employee?        @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  uploadedById   String?
+  uploadedBy     User?            @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  title          String
+  category       DocumentCategory @default(OTHER)
+  fileName       String
+  fileUrl        String
+  fileType       String
+  fileSize       Int
+  notes          String?
+  createdAt      DateTime         @default(now())
+  @@index([businessId, employeeId])
+  @@index([businessId, category])
 }
