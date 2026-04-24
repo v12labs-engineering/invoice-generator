@@ -6,14 +6,15 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
   SidebarHeader,
   SidebarInset,
   SidebarProvider,
+  SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { SidebarNav } from "@/components/sidebar-nav";
+import { SidebarNav, sidebarBottomNav } from "@/components/sidebar-nav";
+import { SidebarBottomNav } from "@/components/sidebar-bottom-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { BusinessSwitcher, type Membership } from "@/components/business-switcher";
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -44,11 +45,10 @@ export function AppShell({
           />
         </SidebarHeader>
         <SidebarContent>
-          <SidebarGroup className="px-2 py-1 group-data-[collapsible=icon]:px-1.5">
-            <SidebarNav />
-          </SidebarGroup>
+          <SidebarNav />
         </SidebarContent>
-        <SidebarFooter className="gap-0.5 p-2">
+        <SidebarFooter className="gap-0 p-2">
+          <SidebarBottomNav items={sidebarBottomNav} />
           <ThemeToggle />
           <form action={signOut}>
             <Button
@@ -61,6 +61,7 @@ export function AppShell({
             </Button>
           </form>
         </SidebarFooter>
+        <SidebarRail />
       </Sidebar>
       <SidebarInset>
         <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur lg:px-6">
