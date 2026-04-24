@@ -93,6 +93,7 @@ model Business {
   employees         Employee[]
   timeOffRequests   TimeOffRequest[]
   documents         Document[]
+  documentTemplates DocumentTemplate[]
   createdAt         DateTime @default(now())
   updatedAt         DateTime @default(now()) @updatedAt
 }
@@ -624,6 +625,8 @@ model Document {
   uploadedBy     User?            @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
   title          String
   category       DocumentCategory @default(OTHER)
+  docType        DocType?
+  generatedBody  String?
   fileName       String
   fileUrl        String
   fileType       String
@@ -632,4 +635,30 @@ model Document {
   createdAt      DateTime         @default(now())
   @@index([businessId, employeeId])
   @@index([businessId, category])
+}
+
+enum DocType {
+  OFFER_LETTER
+  EMPLOYMENT_CONTRACT
+  NDA
+  RELIEVING_LETTER
+  EXPERIENCE_LETTER
+  SALARY_CERTIFICATE
+  PROMOTION_LETTER
+  WARNING_LETTER
+  TERMINATION_LETTER
+  PAYSLIP
+}
+
+model DocumentTemplate {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  docType    DocType
+  title      String
+  body       String
+  updatedAt  DateTime @default(now()) @updatedAt
+  createdAt  DateTime @default(now())
+  @@unique([businessId, docType])
+  @@index([businessId])
 }

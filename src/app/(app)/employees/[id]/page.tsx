@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CheckCircle2, Circle, Plus, Trash2 } from "lucide-react";
+import { CheckCircle2, Circle, FileSignature, Plus, Trash2 } from "lucide-react";
 import {
   getEmployee,
   toggleOnboardingTask,
@@ -21,7 +21,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatMoney } from "@/lib/money";
 
@@ -70,6 +70,13 @@ export default async function EmployeeDetailPage({
         />
         <div className="flex items-center gap-2">
           <Badge variant="secondary">{employee.status}</Badge>
+          <Link
+            href={`/employees/${employee.id}/generate-doc`}
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            <FileSignature className="size-4" />
+            Generate document
+          </Link>
           {employee.status !== "TERMINATED" && (
             <ToastForm<null> action={terminate} successMessage="Terminated">
               <Button type="submit" variant="ghost" size="sm">

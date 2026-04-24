@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { LogOut, Receipt } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { supabaseServer } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +10,6 @@ import {
   SidebarHeader,
   SidebarInset,
   SidebarProvider,
-  SidebarSeparator,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { SidebarNav } from "@/components/sidebar-nav";
@@ -37,26 +35,14 @@ export function AppShell({
   return (
     <SidebarProvider>
       <Sidebar collapsible="icon">
-        <SidebarHeader className="gap-2 px-3 py-3 group-data-[collapsible=icon]:px-2">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 px-1 py-0.5 text-sm font-semibold tracking-tight"
-          >
-            <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Receipt className="size-4" />
-            </div>
-            <span className="group-data-[collapsible=icon]:hidden">Invoicer</span>
-          </Link>
-          <div className="group-data-[collapsible=icon]:hidden">
-            <BusinessSwitcher
-              memberships={memberships}
-              activeBusinessId={activeBusinessId}
-            />
-          </div>
+        <SidebarHeader className="p-2">
+          <BusinessSwitcher
+            memberships={memberships}
+            activeBusinessId={activeBusinessId}
+          />
         </SidebarHeader>
-        <SidebarSeparator />
         <SidebarContent>
-          <SidebarGroup className="px-3 py-3 group-data-[collapsible=icon]:px-2">
+          <SidebarGroup className="px-3 py-1 group-data-[collapsible=icon]:px-2">
             <SidebarNav />
           </SidebarGroup>
         </SidebarContent>
