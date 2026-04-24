@@ -62,7 +62,7 @@ export default async function EmployeeDetailPage({
   const total = employee.onboardingTasks.length;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 p-6 lg:p-8">
+    <div className="flex flex-col gap-4 px-4 py-4 lg:px-6 lg:py-6">
       <div className="flex items-start justify-between gap-4">
         <PageHeader
           title={`${employee.firstName} ${employee.lastName}`}

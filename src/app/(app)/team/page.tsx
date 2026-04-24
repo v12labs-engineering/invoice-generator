@@ -40,7 +40,7 @@ export default async function TeamPage() {
   const res = await listTeam();
   if (!res.ok) {
     return (
-      <div className="mx-auto max-w-3xl p-6 lg:p-8">
+      <div className="flex flex-col gap-4 px-4 py-4 lg:px-6 lg:py-6">
         <PageHeader title="Team" description={res.error} />
       </div>
     );
@@ -62,7 +62,7 @@ export default async function TeamPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-6 lg:p-8">
+    <div className="flex flex-col gap-4 px-4 py-4 lg:px-6 lg:py-6">
       <PageHeader
         title="Team"
         description={`Members of ${businessName}.`}

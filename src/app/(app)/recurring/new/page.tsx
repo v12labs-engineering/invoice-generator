@@ -28,7 +28,7 @@ export default async function NewRecurringPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-6 lg:p-8">
+    <div className="flex flex-col gap-4 px-4 py-4 lg:px-6 lg:py-6">
       <PageHeader
         title="New recurring schedule"
         description="Auto-generate an invoice on a cadence. Runs via the daily cron."

@@ -38,7 +38,7 @@ export default async function ExpensesPage({
   const total = expenses.reduce((sum, e) => sum + e.amount, 0);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+    <div className="flex flex-col gap-4 px-4 py-4 lg:px-6 lg:py-6">
       <PageHeader
         title="Expenses"
         description="Track and manage your business expenses."

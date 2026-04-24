@@ -40,7 +40,7 @@ export default async function GenerateDocPage({
 
   if (!isDocType(type)) {
     return (
-      <div className="mx-auto max-w-3xl space-y-6 p-6 lg:p-8">
+      <div className="flex flex-col gap-4 px-4 py-4 lg:px-6 lg:py-6">
         <PageHeader
           title="Generate document"
           description={`For ${employee.firstName} ${employee.lastName}`}
@@ -73,7 +73,7 @@ export default async function GenerateDocPage({
   if (!business) redirect(`/employees/${id}`);
 
   return (
-    <div className="mx-auto max-w-[90rem] space-y-6 p-6 lg:p-8">
+    <div className="flex flex-col gap-4 px-4 py-4 lg:px-6 lg:py-6">
       <PageHeader
         title={prefilled.data.title}
         description={`${employee.firstName} ${employee.lastName} · ${type.replace(/_/g, " ").toLowerCase()}`}

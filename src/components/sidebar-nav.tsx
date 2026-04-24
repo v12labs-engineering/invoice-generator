@@ -140,16 +140,15 @@ export function SidebarNav() {
   }
 
   const buttonClass = cn(
-    "h-11 gap-3 rounded-lg px-3 text-[0.95rem] font-medium transition-colors",
-    "[&_svg]:size-5 [&_svg]:shrink-0",
-    "text-muted-foreground hover:bg-primary/5 hover:text-foreground",
-    "data-active:bg-primary/10 data-active:text-primary data-active:font-semibold",
-    "data-active:[&_svg]:text-primary",
-    "group-data-[collapsible=icon]:h-9 group-data-[collapsible=icon]:px-0",
+    "h-8 gap-2 rounded-md px-2 text-sm font-medium transition-colors",
+    "[&_svg]:size-4 [&_svg]:shrink-0",
+    "text-muted-foreground hover:bg-accent hover:text-foreground",
+    "data-active:bg-accent data-active:text-foreground data-active:font-medium",
+    "group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:px-0",
   );
 
   return (
-    <SidebarMenu className="gap-1 py-1">
+    <SidebarMenu className="gap-0.5">
       {sections.map((section) => {
         const open = isSectionOpen(section);
         const forced = sectionHasActive(section);
@@ -160,8 +159,8 @@ export function SidebarNav() {
               onClick={() => !forced && toggle(section.label)}
               disabled={forced}
               className={cn(
-                "mb-1 mt-3 flex w-full items-center justify-between gap-2 px-3 text-[0.7rem] font-semibold uppercase tracking-wider text-muted-foreground/60 transition-colors hover:text-foreground group-data-[collapsible=icon]:hidden first:mt-0",
-                forced && "cursor-default hover:text-muted-foreground/60",
+                "mb-0.5 mt-2 flex w-full items-center justify-between gap-2 px-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground/70 transition-colors hover:text-foreground group-data-[collapsible=icon]:hidden first:mt-0",
+                forced && "cursor-default hover:text-muted-foreground/70",
               )}
             >
               <span>{section.label}</span>
@@ -194,8 +193,7 @@ export function SidebarNav() {
           </div>
         );
       })}
-      <div>
-        <p className="mb-1 mt-3 px-3 text-[0.7rem] font-semibold uppercase tracking-wider text-muted-foreground/60 group-data-[collapsible=icon]:hidden" />
+      <div className="mt-2">
         {bottomNav.map((item) => {
           const Icon = item.icon;
           return (

@@ -16,7 +16,7 @@ export function ThemeToggle() {
       variant="ghost"
       onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label="Toggle theme"
-      className="h-11 w-full justify-start gap-3 rounded-lg px-3 text-[0.95rem] font-medium text-muted-foreground hover:bg-primary/5 hover:text-foreground [&_svg]:size-5"
+      className="h-8 w-full justify-start gap-2 rounded-md px-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground [&_svg]:size-4"
       suppressHydrationWarning
     >
       {mounted ? (

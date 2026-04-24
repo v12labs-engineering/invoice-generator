@@ -18,7 +18,7 @@ export default async function RecurringPage() {
   const schedules = await listSchedules();
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+    <div className="flex flex-col gap-4 px-4 py-4 lg:px-6 lg:py-6">
       <PageHeader
         title="Recurring invoices"
         description="Schedules that automatically generate invoices on a cadence."

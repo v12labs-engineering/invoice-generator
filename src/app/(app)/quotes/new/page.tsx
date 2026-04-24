@@ -12,7 +12,7 @@ export default async function NewQuotePage() {
   ]);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+    <div className="flex flex-col gap-4 px-4 py-4 lg:px-6 lg:py-6">
       <PageHeader title="New quote" description="Build a proposal for your client." />
       <QuoteForm clients={clients} defaultCurrency={business?.defaultCurrency ?? "USD"} />
     </div>

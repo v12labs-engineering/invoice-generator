@@ -47,7 +47,7 @@ export default async function DashboardPage() {
   const net = paid - expenses;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6 lg:p-8">
+    <div className="flex flex-col gap-4 px-4 py-4 lg:px-6 lg:py-6">
       <PageHeader title="Dashboard" description="Overview of your business finances." />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <Kpi
