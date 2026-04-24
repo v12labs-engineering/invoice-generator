@@ -9,8 +9,6 @@ import {
   Users,
   Package,
   Repeat,
-  Settings,
-  UsersRound,
   Receipt,
   Store,
   Briefcase,
@@ -143,78 +141,62 @@ export function SidebarNav() {
   }
 
   return (
-    <>
-      <SidebarGroup>
-        <SidebarGroupContent>
-          <SidebarMenu>
-            {pinned.map((item) => {
-              const Icon = item.icon;
-              return (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    isActive={isActive(item.href)}
-                    tooltip={item.label}
-                    render={<Link href={item.href} />}
-                  >
-                    <Icon />
-                    <span>{item.label}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              );
-            })}
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
+    <SidebarGroup className="py-0">
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {pinned.map((item) => {
+            const Icon = item.icon;
+            return (
+              <SidebarMenuItem key={item.href}>
+                <SidebarMenuButton
+                  isActive={isActive(item.href)}
+                  tooltip={item.label}
+                  render={<Link href={item.href} />}
+                >
+                  <Icon />
+                  <span>{item.label}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
 
-      {sections.map((section) => {
-        const sectionActive = section.label === activeSection;
-        return (
+        {sections.map((section) => (
           <Collapsible
             key={section.label}
             open={isOpen(section.label)}
             onOpenChange={(v) => toggle(section.label, v)}
+            className="group/collapsible"
           >
-            <SidebarGroup>
-              <CollapsibleTrigger asChild>
-                <SidebarGroupLabel
-                  className="group/label flex w-full cursor-pointer items-center justify-between pr-2 hover:text-sidebar-foreground data-[state=open]:[&_svg]:rotate-90"
-                  data-active={sectionActive || undefined}
-                >
-                  <span>{section.label}</span>
-                  <ChevronRight className="size-3.5 shrink-0 transition-transform duration-200" />
-                </SidebarGroupLabel>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {section.items.map((item) => {
-                      const Icon = item.icon;
-                      return (
-                        <SidebarMenuItem key={item.href}>
-                          <SidebarMenuButton
-                            isActive={isActive(item.href)}
-                            tooltip={item.label}
-                            render={<Link href={item.href} />}
-                          >
-                            <Icon />
-                            <span>{item.label}</span>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      );
-                    })}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </CollapsibleContent>
-            </SidebarGroup>
+            <CollapsibleTrigger asChild>
+              <SidebarGroupLabel className="mt-2 flex w-full cursor-pointer items-center justify-between pr-1 hover:text-sidebar-foreground">
+                <span>{section.label}</span>
+                <ChevronRight className="size-3.5 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+              </SidebarGroupLabel>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+              <SidebarMenu>
+                {section.items.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        isActive={isActive(item.href)}
+                        tooltip={item.label}
+                        render={<Link href={item.href} />}
+                      >
+                        <Icon />
+                        <span>{item.label}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </CollapsibleContent>
           </Collapsible>
-        );
-      })}
-
-    </>
+        ))}
+      </SidebarGroupContent>
+    </SidebarGroup>
   );
 }
 
-export const sidebarBottomNav = [
-  { href: "/team", label: "Team", icon: UsersRound },
-  { href: "/settings", label: "Settings", icon: Settings },
-];

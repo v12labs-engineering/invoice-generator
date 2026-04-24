@@ -1,21 +1,23 @@
 import { redirect } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { supabaseServer } from "@/lib/supabase/server";
-import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
   SidebarProvider,
   SidebarRail,
+  SidebarSeparator,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { SidebarNav, sidebarBottomNav } from "@/components/sidebar-nav";
-import { SidebarBottomNav } from "@/components/sidebar-bottom-nav";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { SidebarNav } from "@/components/sidebar-nav";
+import { SidebarFooterNav } from "@/components/sidebar-footer-nav";
 import { BusinessSwitcher, type Membership } from "@/components/business-switcher";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 
@@ -44,22 +46,26 @@ export function AppShell({
             activeBusinessId={activeBusinessId}
           />
         </SidebarHeader>
+        <SidebarSeparator />
         <SidebarContent>
           <SidebarNav />
         </SidebarContent>
+        <SidebarSeparator />
         <SidebarFooter className="gap-0 p-2">
-          <SidebarBottomNav items={sidebarBottomNav} />
-          <ThemeToggle />
-          <form action={signOut}>
-            <Button
-              type="submit"
-              variant="ghost"
-              className="h-8 w-full justify-start gap-2 rounded-md px-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground [&_svg]:size-4"
-            >
-              <LogOut />
-              <span>Sign out</span>
-            </Button>
-          </form>
+          <SidebarFooterNav />
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <form action={signOut}>
+                <SidebarMenuButton
+                  tooltip="Sign out"
+                  render={<button type="submit" />}
+                >
+                  <LogOut />
+                  <span>Sign out</span>
+                </SidebarMenuButton>
+              </form>
+            </SidebarMenuItem>
+          </SidebarMenu>
         </SidebarFooter>
         <SidebarRail />
       </Sidebar>
