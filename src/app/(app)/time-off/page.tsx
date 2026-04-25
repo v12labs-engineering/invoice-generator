@@ -98,7 +98,7 @@ export default async function TimeOffPage() {
               <div className="space-y-2">
                 <Label htmlFor="employeeId">Employee</Label>
                 <Select name="employeeId" required>
-                  <SelectTrigger id="employeeId" className="w-full h-11">
+                  <SelectTrigger id="employeeId" className="w-full">
                     <SelectValue placeholder="Select..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -113,7 +113,7 @@ export default async function TimeOffPage() {
               <div className="space-y-2">
                 <Label htmlFor="type">Type</Label>
                 <Select name="type" defaultValue="VACATION">
-                  <SelectTrigger id="type" className="w-full h-11">
+                  <SelectTrigger id="type" className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

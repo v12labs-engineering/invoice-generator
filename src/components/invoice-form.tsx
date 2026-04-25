@@ -203,7 +203,7 @@ export function InvoiceForm({
                   value={clientId}
                   onValueChange={(v) => setClientId(v ?? "")}
                 >
-                  <SelectTrigger id="clientId" className="w-full h-11">
+                  <SelectTrigger id="clientId" className="w-full">
                     <SelectValue placeholder="Select a client..." />
                   </SelectTrigger>
                   <SelectContent>

@@ -142,7 +142,7 @@ export default async function SubscriptionsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="cycle">Billing cycle</Label>
                   <Select name="cycle" defaultValue="MONTHLY">
-                    <SelectTrigger id="cycle" className="w-full h-11">
+                    <SelectTrigger id="cycle" className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

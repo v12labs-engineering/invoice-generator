@@ -84,7 +84,7 @@ export function RecurringForm({
             <div className="space-y-2">
               <Label htmlFor="clientId">Client</Label>
               <Select name="clientId" required defaultValue="">
-                <SelectTrigger id="clientId" className="w-full h-11">
+                <SelectTrigger id="clientId" className="w-full">
                   <SelectValue placeholder="Select a client..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -97,7 +97,7 @@ export function RecurringForm({
             <div className="space-y-2">
               <Label htmlFor="cadence">Cadence</Label>
               <Select name="cadence" defaultValue="MONTHLY" required>
-                <SelectTrigger id="cadence" className="w-full h-11">
+                <SelectTrigger id="cadence" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

@@ -92,7 +92,7 @@ export default async function ContactsPage() {
               <div className="space-y-2">
                 <Label htmlFor="clientId">Company</Label>
                 <Select name="clientId" defaultValue="">
-                  <SelectTrigger id="clientId" className="w-full h-11">
+                  <SelectTrigger id="clientId" className="w-full">
                     <SelectValue placeholder="Unassigned" />
                   </SelectTrigger>
                   <SelectContent>

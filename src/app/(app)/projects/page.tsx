@@ -83,7 +83,7 @@ export default async function ProjectsPage() {
               <div className="space-y-2">
                 <Label htmlFor="clientId">Client</Label>
                 <Select name="clientId" defaultValue="">
-                  <SelectTrigger id="clientId" className="w-full h-11">
+                  <SelectTrigger id="clientId" className="w-full">
                     <SelectValue placeholder="No client (internal)" />
                   </SelectTrigger>
                   <SelectContent>

@@ -118,7 +118,7 @@ export function QuoteForm({
           <div className="space-y-2 md:col-span-2">
             <Label>Client</Label>
             <Select value={clientId} onValueChange={(v) => setClientId(v ?? "")}>
-              <SelectTrigger className="w-full h-11">
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a client..." />
               </SelectTrigger>
               <SelectContent>

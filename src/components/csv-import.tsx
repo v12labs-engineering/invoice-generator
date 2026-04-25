@@ -172,7 +172,7 @@ export function CsvImport() {
                     value={String(mapping[key])}
                     onValueChange={(v) => onMappingChange(key, v)}
                   >
-                    <SelectTrigger id={`map-${key}`} className="w-full h-11">
+                    <SelectTrigger id={`map-${key}`} className="w-full">
                       <SelectValue placeholder="— not mapped —" />
                     </SelectTrigger>
                     <SelectContent>

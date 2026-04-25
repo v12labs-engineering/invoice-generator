@@ -84,7 +84,7 @@ export default async function DocumentsPage() {
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
                 <Select name="category" defaultValue="OTHER">
-                  <SelectTrigger id="category" className="w-full h-11">
+                  <SelectTrigger id="category" className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -99,7 +99,7 @@ export default async function DocumentsPage() {
               <div className="space-y-2">
                 <Label htmlFor="employeeId">Employee (optional)</Label>
                 <Select name="employeeId" defaultValue="">
-                  <SelectTrigger id="employeeId" className="w-full h-11">
+                  <SelectTrigger id="employeeId" className="w-full">
                     <SelectValue placeholder="—" />
                   </SelectTrigger>
                   <SelectContent>

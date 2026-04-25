@@ -140,7 +140,7 @@ export function ExpenseForm({
       <div className="space-y-2">
         <Label htmlFor="categoryId">Category</Label>
         <Select name="categoryId" required defaultValue={expense?.categoryId ?? ""}>
-          <SelectTrigger id="categoryId" className="w-full h-11">
+          <SelectTrigger id="categoryId" className="w-full">
             <SelectValue placeholder="Select a category" />
           </SelectTrigger>
           <SelectContent>
@@ -154,7 +154,7 @@ export function ExpenseForm({
       <div className="space-y-2">
         <Label htmlFor="subscriptionId">Subscription</Label>
         <Select name="subscriptionId" defaultValue={expense?.subscriptionId ?? ""}>
-          <SelectTrigger id="subscriptionId" className="w-full h-11">
+          <SelectTrigger id="subscriptionId" className="w-full">
             <SelectValue placeholder="None" />
           </SelectTrigger>
           <SelectContent>
@@ -169,7 +169,7 @@ export function ExpenseForm({
       <div className="space-y-2">
         <Label htmlFor="paymentMethod">Payment method</Label>
         <Select name="paymentMethod" defaultValue={expense?.paymentMethod ?? ""}>
-          <SelectTrigger id="paymentMethod" className="w-full h-11">
+          <SelectTrigger id="paymentMethod" className="w-full">
             <SelectValue placeholder="Select method" />
           </SelectTrigger>
           <SelectContent>

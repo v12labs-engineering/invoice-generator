@@ -105,7 +105,7 @@ export function SubscriptionEditDialog({
             <div className="space-y-2">
               <Label htmlFor={`cycle-${subscription.id}`}>Billing cycle</Label>
               <Select name="cycle" defaultValue={subscription.cycle}>
-                <SelectTrigger id={`cycle-${subscription.id}`} className="w-full h-11">
+                <SelectTrigger id={`cycle-${subscription.id}`} className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

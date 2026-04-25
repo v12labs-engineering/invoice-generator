@@ -102,7 +102,7 @@ export default async function DealsPage() {
             <div className="space-y-2">
               <Label htmlFor="clientId">Client</Label>
               <Select name="clientId" defaultValue="">
-                <SelectTrigger id="clientId" className="w-full h-11">
+                <SelectTrigger id="clientId" className="w-full">
                   <SelectValue placeholder="—" />
                 </SelectTrigger>
                 <SelectContent>
@@ -115,7 +115,7 @@ export default async function DealsPage() {
             <div className="space-y-2">
               <Label htmlFor="contactId">Contact</Label>
               <Select name="contactId" defaultValue="">
-                <SelectTrigger id="contactId" className="w-full h-11">
+                <SelectTrigger id="contactId" className="w-full">
                   <SelectValue placeholder="—" />
                 </SelectTrigger>
                 <SelectContent>
@@ -147,7 +147,7 @@ export default async function DealsPage() {
             <div className="space-y-2">
               <Label htmlFor="stage">Stage</Label>
               <Select name="stage" defaultValue="LEAD">
-                <SelectTrigger id="stage" className="w-full h-11">
+                <SelectTrigger id="stage" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

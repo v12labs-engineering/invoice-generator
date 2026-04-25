@@ -104,7 +104,7 @@ export default async function EmployeesPage() {
             <div className="space-y-2">
               <Label htmlFor="employmentType">Type</Label>
               <Select name="employmentType" defaultValue="FULL_TIME">
-                <SelectTrigger id="employmentType" className="w-full h-11">
+                <SelectTrigger id="employmentType" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -122,7 +122,7 @@ export default async function EmployeesPage() {
             <div className="space-y-2">
               <Label htmlFor="managerId">Manager</Label>
               <Select name="managerId" defaultValue="">
-                <SelectTrigger id="managerId" className="w-full h-11">
+                <SelectTrigger id="managerId" className="w-full">
                   <SelectValue placeholder="—" />
                 </SelectTrigger>
                 <SelectContent>
