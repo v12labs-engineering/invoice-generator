@@ -3,11 +3,14 @@ import { notFound } from "next/navigation";
 import { CheckCircle2, Circle, FileSignature, Plus, Trash2 } from "lucide-react";
 import {
   getEmployee,
+  listEmployees,
   toggleOnboardingTask,
   addOnboardingTask,
   deleteOnboardingTask,
   terminateEmployee,
+  updateEmployee,
 } from "@/lib/actions/employees";
+import { EditEmployeeDialog } from "@/components/edit-employee-dialog";
 import type { Result } from "@/lib/result";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,8 +34,37 @@ export default async function EmployeeDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const employee = await getEmployee(id);
+  const [employee, allEmployees] = await Promise.all([
+    getEmployee(id),
+    listEmployees(),
+  ]);
   if (!employee) notFound();
+
+  // Eligible managers: every other active employee.
+  const managers = allEmployees
+    .filter((e) => e.id !== id && e.status !== "TERMINATED")
+    .map((e) => ({ id: e.id, firstName: e.firstName, lastName: e.lastName }));
+
+  async function update(_prev: Result<null> | null, formData: FormData) {
+    "use server";
+    return updateEmployee(id, {
+      firstName: formData.get("firstName"),
+      lastName: formData.get("lastName"),
+      email: formData.get("email"),
+      phone: formData.get("phone"),
+      title: formData.get("title"),
+      department: formData.get("department"),
+      employmentType: formData.get("employmentType"),
+      status: formData.get("status"),
+      startDate: formData.get("startDate"),
+      endDate: formData.get("endDate"),
+      salaryAmount: formData.get("salaryAmount"),
+      salaryCurrency: formData.get("salaryCurrency"),
+      ptoBalanceDays: formData.get("ptoBalanceDays"),
+      managerId: formData.get("managerId"),
+      notes: formData.get("notes"),
+    });
+  }
 
   async function toggle(taskId: string, _prev: Result<null> | null, _fd: FormData) {
     "use server";
@@ -68,8 +100,30 @@ export default async function EmployeeDetailPage({
           title={`${employee.firstName} ${employee.lastName}`}
           description={`${employee.title ?? "—"} · ${employee.department ?? "No department"}`}
         />
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Badge variant="secondary">{employee.status}</Badge>
+          <EditEmployeeDialog
+            employee={{
+              id: employee.id,
+              firstName: employee.firstName,
+              lastName: employee.lastName,
+              email: employee.email,
+              phone: employee.phone,
+              title: employee.title,
+              department: employee.department,
+              employmentType: employee.employmentType,
+              status: employee.status,
+              startDate: employee.startDate,
+              endDate: employee.endDate,
+              salaryAmount: employee.salaryAmount,
+              salaryCurrency: employee.salaryCurrency,
+              ptoBalanceDays: employee.ptoBalanceDays,
+              managerId: employee.managerId,
+              notes: employee.notes,
+            }}
+            managers={managers}
+            action={update}
+          />
           <Link
             href={`/employees/${employee.id}/generate-doc`}
             className={buttonVariants({ variant: "outline", size: "sm" })}
