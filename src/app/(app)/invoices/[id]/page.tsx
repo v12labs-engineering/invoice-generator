@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import { Ban, CheckCircle2, Download, Receipt, Send, Trash2 } from "lucide-react";
+import { Ban, CheckCircle2, Download, Receipt, Trash2 } from "lucide-react";
 import { listClients } from "@/lib/actions/clients";
 import { getBusinessProfile } from "@/lib/actions/settings";
 import {
@@ -15,12 +15,12 @@ import { formatMoney } from "@/lib/money";
 import type { Result } from "@/lib/result";
 import { effectiveStatus, StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/page-header";
 import { FormSubmitButton } from "@/components/form-submit-button";
 import { InvoiceForm } from "@/components/invoice-form";
 import { ToastForm } from "@/components/toast-form";
+import { RecordPaymentDialog } from "@/components/record-payment-dialog";
+import { SendInvoiceDialog } from "@/components/send-invoice-dialog";
 import {
   Card,
   CardContent,
@@ -207,105 +207,6 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             </CardContent>
           </Card>
 
-          {canRecordPayment && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Record payment</CardTitle>
-                <CardDescription>Log a payment received for this invoice.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ToastForm<null>
-                  action={pay}
-                  successMessage="Payment recorded"
-                  className="space-y-4"
-                >
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="amount">Amount</Label>
-                      <Input
-                        id="amount"
-                        name="amount"
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="paidAt">Date</Label>
-                      <Input
-                        id="paidAt"
-                        name="paidAt"
-                        type="date"
-                        required
-                        defaultValue={new Date().toISOString().slice(0, 10)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="method">Method</Label>
-                      <select
-                        id="method"
-                        name="method"
-                        className="flex h-11 w-full rounded-lg border border-input bg-transparent px-3 text-base md:text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
-                        defaultValue="bank"
-                      >
-                        <option value="bank">Bank</option>
-                        <option value="card">Card</option>
-                        <option value="cash">Cash</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="reference">Reference</Label>
-                    <Input
-                      id="reference"
-                      name="reference"
-                      placeholder="Transaction ID, check #, etc."
-                    />
-                  </div>
-                  <FormSubmitButton>Record payment</FormSubmitButton>
-                </ToastForm>
-              </CardContent>
-            </Card>
-          )}
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Email invoice</CardTitle>
-              <CardDescription>Send this invoice to your client.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ToastForm<null>
-                action={send}
-                successMessage="Invoice sent"
-                className="space-y-4"
-              >
-                <div className="space-y-2">
-                  <Label htmlFor="to">Recipient</Label>
-                  <Input
-                    id="to"
-                    name="to"
-                    type="email"
-                    required
-                    defaultValue={invoice.client.email ?? ""}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="message">Message (optional)</Label>
-                  <Input
-                    id="message"
-                    name="message"
-                    placeholder="Hi — please find the invoice attached."
-                  />
-                </div>
-                <FormSubmitButton>
-                  <Send className="size-4" />
-                  Send invoice
-                </FormSubmitButton>
-              </ToastForm>
-            </CardContent>
-          </Card>
         </div>
 
         <div className="space-y-6">
@@ -314,6 +215,16 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
               <CardTitle>Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
+              <SendInvoiceDialog
+                action={send}
+                defaultRecipient={invoice.client.email ?? ""}
+              />
+              {canRecordPayment && (
+                <RecordPaymentDialog
+                  action={pay}
+                  defaultDate={new Date().toISOString().slice(0, 10)}
+                />
+              )}
               <Button
                 variant="outline"
                 className="w-full justify-start"

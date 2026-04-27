@@ -1,4 +1,4 @@
-import { Plus, Target, Trash2 } from "lucide-react";
+import { Target, Trash2 } from "lucide-react";
 import {
   listDeals,
   createDeal,
@@ -8,30 +8,13 @@ import {
 import { listClients } from "@/lib/actions/clients";
 import { listContacts } from "@/lib/actions/contacts";
 import type { Result } from "@/lib/result";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
-import { FormSubmitButton } from "@/components/form-submit-button";
 import { ToastForm } from "@/components/toast-form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DealStageSelect } from "@/components/deal-stage-select";
+import { AddDealDialog } from "@/components/add-deal-dialog";
 import { formatMoney } from "@/lib/money";
 
 const STAGES = [
@@ -82,127 +65,20 @@ export default async function DealsPage() {
 
   return (
     <div className="flex flex-col gap-4 px-4 py-4 lg:px-6 lg:py-6">
-      <PageHeader title="Deals" description="Your sales pipeline." />
-
-      <Card>
-        <CardHeader>
-          <CardTitle>New deal</CardTitle>
-          <CardDescription>Add an opportunity to your pipeline.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ToastForm<{ id: string }>
-            className="grid gap-3 md:grid-cols-3 lg:grid-cols-6"
-            action={add}
-            successMessage="Deal added"
-          >
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                name="title"
-                placeholder="e.g. Acme — Q2 retainer"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="clientId">Client</Label>
-              <Select name="clientId" defaultValue="">
-                <SelectTrigger id="clientId" className="w-full">
-                  <SelectValue placeholder="Select a client" />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="contactId">Contact</Label>
-              <Select name="contactId" defaultValue="">
-                <SelectTrigger id="contactId" className="w-full">
-                  <SelectValue placeholder="Select a contact" />
-                </SelectTrigger>
-                <SelectContent>
-                  {contacts.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="value">Value (cents)</Label>
-              <Input
-                id="value"
-                name="value"
-                type="number"
-                min={0}
-                placeholder="50000"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="probability">Probability %</Label>
-              <Input
-                id="probability"
-                name="probability"
-                type="number"
-                min={0}
-                max={100}
-                defaultValue={0}
-                placeholder="0–100"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="currency">Currency</Label>
-              <Input
-                id="currency"
-                name="currency"
-                defaultValue="USD"
-                maxLength={3}
-                placeholder="USD"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="stage">Stage</Label>
-              <Select name="stage" defaultValue="LEAD">
-                <SelectTrigger id="stage" className="w-full">
-                  <SelectValue placeholder="Select a stage" />
-                </SelectTrigger>
-                <SelectContent>
-                  {STAGES.map((s) => (
-                    <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="expectedAt">Expected close</Label>
-              <Input id="expectedAt" name="expectedAt" type="date" />
-            </div>
-            <div className="space-y-2 md:col-span-3">
-              <Label htmlFor="notes">Notes</Label>
-              <Textarea
-                id="notes"
-                name="notes"
-                rows={1}
-                placeholder="Decision criteria, key contacts, blockers"
-              />
-            </div>
-            <div className="md:col-span-6">
-              <FormSubmitButton>
-                <Plus className="size-4" />
-                Add deal
-              </FormSubmitButton>
-            </div>
-          </ToastForm>
-        </CardContent>
-      </Card>
+      <div className="flex items-start justify-between gap-3">
+        <PageHeader title="Deals" description="Your sales pipeline." />
+        <AddDealDialog
+          action={add}
+          clients={clients.map((c) => ({ id: c.id, name: c.name }))}
+          contacts={contacts.map((c) => ({ id: c.id, name: c.name }))}
+        />
+      </div>
 
       {deals.length === 0 ? (
         <EmptyState
           icon={Target}
           title="No deals yet"
-          description="Add your first opportunity to start tracking your pipeline."
+          description="Click 'New deal' to start tracking your pipeline."
         />
       ) : (
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
