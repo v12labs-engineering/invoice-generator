@@ -79,13 +79,18 @@ export default async function DocumentsPage() {
             >
               <div className="space-y-2">
                 <Label htmlFor="title">Title</Label>
-                <Input id="title" name="title" required />
+                <Input
+                  id="title"
+                  name="title"
+                  placeholder="e.g. 2026 employee handbook"
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
                 <Select name="category" defaultValue="OTHER">
                   <SelectTrigger id="category" className="w-full">
-                    <SelectValue />
+                    <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="CONTRACT">Contract</SelectItem>
@@ -100,7 +105,7 @@ export default async function DocumentsPage() {
                 <Label htmlFor="employeeId">Employee (optional)</Label>
                 <Select name="employeeId" defaultValue="">
                   <SelectTrigger id="employeeId" className="w-full">
-                    <SelectValue placeholder="—" />
+                    <SelectValue placeholder="Link to an employee" />
                   </SelectTrigger>
                   <SelectContent>
                     {employees.map((e) => (
@@ -113,7 +118,12 @@ export default async function DocumentsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="notes">Notes</Label>
-                <Textarea id="notes" name="notes" rows={2} />
+                <Textarea
+                  id="notes"
+                  name="notes"
+                  rows={2}
+                  placeholder="Context about this file"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="file">File</Label>

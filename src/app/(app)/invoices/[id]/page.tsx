@@ -222,7 +222,14 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <div className="space-y-2">
                       <Label htmlFor="amount">Amount</Label>
-                      <Input id="amount" name="amount" type="number" step="0.01" required />
+                      <Input
+                        id="amount"
+                        name="amount"
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        required
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="paidAt">Date</Label>
@@ -251,7 +258,11 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="reference">Reference</Label>
-                    <Input id="reference" name="reference" />
+                    <Input
+                      id="reference"
+                      name="reference"
+                      placeholder="Transaction ID, check #, etc."
+                    />
                   </div>
                   <FormSubmitButton>Record payment</FormSubmitButton>
                 </ToastForm>
@@ -282,7 +293,11 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="message">Message (optional)</Label>
-                  <Input id="message" name="message" />
+                  <Input
+                    id="message"
+                    name="message"
+                    placeholder="Hi — please find the invoice attached."
+                  />
                 </div>
                 <FormSubmitButton>
                   <Send className="size-4" />

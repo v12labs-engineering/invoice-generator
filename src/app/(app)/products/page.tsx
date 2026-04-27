@@ -54,24 +54,46 @@ export default async function ProductsPage() {
             <form action={add} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
-                <Input id="name" name="name" required />
+                <Input id="name" name="name" placeholder="e.g. Consulting hour" required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
-                <Input id="description" name="description" />
+                <Input
+                  id="description"
+                  name="description"
+                  placeholder="Shown on invoices"
+                />
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="unitPrice">Unit price</Label>
-                  <Input id="unitPrice" name="unitPrice" type="number" step="0.01" required />
+                  <Input
+                    id="unitPrice"
+                    name="unitPrice"
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="currency">Currency</Label>
-                  <Input id="currency" name="currency" defaultValue="USD" />
+                  <Input
+                    id="currency"
+                    name="currency"
+                    defaultValue="USD"
+                    placeholder="USD"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="defaultTaxRate">Tax (bps)</Label>
-                  <Input id="defaultTaxRate" name="defaultTaxRate" type="number" defaultValue={0} />
+                  <Input
+                    id="defaultTaxRate"
+                    name="defaultTaxRate"
+                    type="number"
+                    defaultValue={0}
+                    placeholder="0"
+                  />
                 </div>
               </div>
               <FormSubmitButton>

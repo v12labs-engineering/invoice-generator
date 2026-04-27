@@ -63,7 +63,13 @@ export function ClientEditDialog({
         >
           <div className="space-y-2">
             <Label htmlFor={`name-${client.id}`}>Name</Label>
-            <Input id={`name-${client.id}`} name="name" required defaultValue={client.name} />
+            <Input
+              id={`name-${client.id}`}
+              name="name"
+              placeholder="Acme Inc."
+              required
+              defaultValue={client.name}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor={`email-${client.id}`}>Email</Label>
@@ -71,6 +77,7 @@ export function ClientEditDialog({
               id={`email-${client.id}`}
               name="email"
               type="email"
+              placeholder="billing@acme.com"
               defaultValue={client.email ?? ""}
             />
           </div>
@@ -80,12 +87,18 @@ export function ClientEditDialog({
               id={`addressLines-${client.id}`}
               name="addressLines"
               rows={2}
+              placeholder={"123 Main St\nSan Francisco, CA 94105"}
               defaultValue={client.addressLines.join("\n")}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor={`taxId-${client.id}`}>Tax ID</Label>
-            <Input id={`taxId-${client.id}`} name="taxId" defaultValue={client.taxId ?? ""} />
+            <Input
+              id={`taxId-${client.id}`}
+              name="taxId"
+              placeholder="GSTIN, VAT, or EIN"
+              defaultValue={client.taxId ?? ""}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor={`notes-${client.id}`}>Notes</Label>
@@ -93,6 +106,7 @@ export function ClientEditDialog({
               id={`notes-${client.id}`}
               name="notes"
               rows={2}
+              placeholder="Internal notes about this client"
               defaultValue={client.notes ?? ""}
             />
           </div>

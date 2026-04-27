@@ -90,7 +90,7 @@ export default async function TeamPage() {
                 <Label htmlFor="role">Role</Label>
                 <Select name="role" defaultValue="MEMBER">
                   <SelectTrigger id="role" className="w-full">
-                    <SelectValue />
+                    <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="MEMBER">Member</SelectItem>

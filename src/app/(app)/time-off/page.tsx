@@ -99,7 +99,7 @@ export default async function TimeOffPage() {
                 <Label htmlFor="employeeId">Employee</Label>
                 <Select name="employeeId" required>
                   <SelectTrigger id="employeeId" className="w-full">
-                    <SelectValue placeholder="Select..." />
+                    <SelectValue placeholder="Select an employee" />
                   </SelectTrigger>
                   <SelectContent>
                     {activeEmployees.map((e) => (
@@ -114,7 +114,7 @@ export default async function TimeOffPage() {
                 <Label htmlFor="type">Type</Label>
                 <Select name="type" defaultValue="VACATION">
                   <SelectTrigger id="type" className="w-full">
-                    <SelectValue />
+                    <SelectValue placeholder="Select a type" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="VACATION">Vacation</SelectItem>
@@ -137,7 +137,12 @@ export default async function TimeOffPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="reason">Reason (optional)</Label>
-                <Textarea id="reason" name="reason" rows={2} />
+                <Textarea
+                  id="reason"
+                  name="reason"
+                  rows={2}
+                  placeholder="Family event, conference, etc."
+                />
               </div>
               <FormSubmitButton>
                 <Plus className="size-4" />

@@ -143,7 +143,7 @@ export default async function SubscriptionsPage() {
                   <Label htmlFor="cycle">Billing cycle</Label>
                   <Select name="cycle" defaultValue="MONTHLY">
                     <SelectTrigger id="cycle" className="w-full">
-                      <SelectValue />
+                      <SelectValue placeholder="Select a cycle" />
                     </SelectTrigger>
                     <SelectContent>
                       {CYCLES.map((c) => (

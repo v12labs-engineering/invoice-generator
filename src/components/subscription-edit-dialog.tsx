@@ -77,7 +77,13 @@ export function SubscriptionEditDialog({
         >
           <div className="space-y-2">
             <Label htmlFor={`name-${subscription.id}`}>Name</Label>
-            <Input id={`name-${subscription.id}`} name="name" required defaultValue={subscription.name} />
+            <Input
+              id={`name-${subscription.id}`}
+              name="name"
+              placeholder="AWS, Figma, Slack..."
+              required
+              defaultValue={subscription.name}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor={`url-${subscription.id}`}>URL</Label>
@@ -106,7 +112,7 @@ export function SubscriptionEditDialog({
               <Label htmlFor={`cycle-${subscription.id}`}>Billing cycle</Label>
               <Select name="cycle" defaultValue={subscription.cycle}>
                 <SelectTrigger id={`cycle-${subscription.id}`} className="w-full">
-                  <SelectValue />
+                  <SelectValue placeholder="Select a cycle" />
                 </SelectTrigger>
                 <SelectContent>
                   {CYCLES.map((c) => (

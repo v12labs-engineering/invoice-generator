@@ -105,6 +105,7 @@ export function ExpenseForm({
         <Input
           id="description"
           name="description"
+          placeholder="What was this for?"
           required
           defaultValue={expense?.description ?? ""}
         />
@@ -197,6 +198,7 @@ export function ExpenseForm({
           id="notes"
           name="notes"
           rows={3}
+          placeholder="Additional context for this expense"
           defaultValue={expense?.notes ?? ""}
         />
       </div>

@@ -98,7 +98,7 @@ export function RecurringForm({
               <Label htmlFor="cadence">Cadence</Label>
               <Select name="cadence" defaultValue="MONTHLY" required>
                 <SelectTrigger id="cadence" className="w-full">
-                  <SelectValue />
+                  <SelectValue placeholder="Select a cadence" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="WEEKLY">Weekly</SelectItem>
@@ -144,7 +144,12 @@ export function RecurringForm({
             </div>
             <div className="space-y-2">
               <Label htmlFor="endDate">End date (optional)</Label>
-              <Input id="endDate" name="endDate" type="date" />
+              <Input
+                id="endDate"
+                name="endDate"
+                type="date"
+                placeholder="Leave blank for no end"
+              />
             </div>
           </div>
           <div className="mt-4 flex items-center gap-2">
@@ -345,11 +350,21 @@ export function RecurringForm({
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="notes">Notes</Label>
-            <Textarea id="notes" name="notes" rows={3} />
+            <Textarea
+              id="notes"
+              name="notes"
+              rows={3}
+              placeholder="Internal notes for this schedule"
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="terms">Terms</Label>
-            <Textarea id="terms" name="terms" rows={3} />
+            <Textarea
+              id="terms"
+              name="terms"
+              rows={3}
+              placeholder="Payment terms, late fees, etc."
+            />
           </div>
         </CardContent>
       </Card>

@@ -136,11 +136,21 @@ export function QuoteForm({
           </div>
           <div className="space-y-2">
             <Label>Expiry date</Label>
-            <Input type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} />
+            <Input
+              type="date"
+              value={expiryDate}
+              onChange={(e) => setExpiryDate(e.target.value)}
+              placeholder="Optional"
+            />
           </div>
           <div className="space-y-2">
             <Label>Currency</Label>
-            <Input maxLength={3} value={currency} onChange={(e) => setCurrency(e.target.value.toUpperCase())} />
+            <Input
+              maxLength={3}
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value.toUpperCase())}
+              placeholder="USD"
+            />
           </div>
         </CardContent>
       </Card>
@@ -281,11 +291,21 @@ export function QuoteForm({
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <Label>Notes</Label>
-            <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} />
+            <Textarea
+              rows={3}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Visible on the quote (e.g. scope summary)"
+            />
           </div>
           <div className="space-y-2">
             <Label>Terms</Label>
-            <Textarea rows={3} value={terms} onChange={(e) => setTerms(e.target.value)} />
+            <Textarea
+              rows={3}
+              value={terms}
+              onChange={(e) => setTerms(e.target.value)}
+              placeholder="Payment terms, validity, conditions"
+            />
           </div>
         </CardContent>
       </Card>

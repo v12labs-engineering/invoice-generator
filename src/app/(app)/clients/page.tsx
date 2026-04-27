@@ -85,23 +85,38 @@ export default async function ClientsPage() {
             >
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
-                <Input id="name" name="name" required />
+                <Input id="name" name="name" placeholder="Acme Inc." required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" name="email" type="email" />
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="billing@acme.com"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="addressLines">Address</Label>
-                <Textarea id="addressLines" name="addressLines" rows={2} />
+                <Textarea
+                  id="addressLines"
+                  name="addressLines"
+                  rows={2}
+                  placeholder={"123 Main St\nSan Francisco, CA 94105"}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="taxId">Tax ID</Label>
-                <Input id="taxId" name="taxId" />
+                <Input id="taxId" name="taxId" placeholder="GSTIN, VAT, or EIN" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="notes">Notes</Label>
-                <Textarea id="notes" name="notes" rows={2} />
+                <Textarea
+                  id="notes"
+                  name="notes"
+                  rows={2}
+                  placeholder="Internal notes about this client"
+                />
               </div>
               <FormSubmitButton>
                 <Plus className="size-4" />

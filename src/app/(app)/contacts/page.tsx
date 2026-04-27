@@ -75,15 +75,20 @@ export default async function ContactsPage() {
             >
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
-                <Input id="name" name="name" required />
+                <Input id="name" name="name" placeholder="Jane Doe" required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" name="email" type="email" />
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="jane@acme.com"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone</Label>
-                <Input id="phone" name="phone" />
+                <Input id="phone" name="phone" placeholder="+1 555 123 4567" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="title">Title</Label>
@@ -104,7 +109,12 @@ export default async function ContactsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="notes">Notes</Label>
-                <Textarea id="notes" name="notes" rows={2} />
+                <Textarea
+                  id="notes"
+                  name="notes"
+                  rows={2}
+                  placeholder="How you met, preferences, etc."
+                />
               </div>
               <FormSubmitButton>
                 <Plus className="size-4" />

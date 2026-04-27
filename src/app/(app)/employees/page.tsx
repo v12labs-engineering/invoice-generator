@@ -79,33 +79,43 @@ export default async function EmployeesPage() {
           >
             <div className="space-y-2">
               <Label htmlFor="firstName">First name</Label>
-              <Input id="firstName" name="firstName" required />
+              <Input id="firstName" name="firstName" placeholder="Jane" required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="lastName">Last name</Label>
-              <Input id="lastName" name="lastName" required />
+              <Input id="lastName" name="lastName" placeholder="Doe" required />
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" required />
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="jane.doe@company.com"
+                required
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">Phone</Label>
-              <Input id="phone" name="phone" />
+              <Input id="phone" name="phone" placeholder="+1 555 123 4567" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="title">Title</Label>
-              <Input id="title" name="title" />
+              <Input id="title" name="title" placeholder="e.g. Senior Engineer" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="department">Department</Label>
-              <Input id="department" name="department" />
+              <Input
+                id="department"
+                name="department"
+                placeholder="e.g. Engineering"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="employmentType">Type</Label>
               <Select name="employmentType" defaultValue="FULL_TIME">
                 <SelectTrigger id="employmentType" className="w-full">
-                  <SelectValue />
+                  <SelectValue placeholder="Select a type" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="FULL_TIME">Full-time</SelectItem>
@@ -123,7 +133,7 @@ export default async function EmployeesPage() {
               <Label htmlFor="managerId">Manager</Label>
               <Select name="managerId" defaultValue="">
                 <SelectTrigger id="managerId" className="w-full">
-                  <SelectValue placeholder="—" />
+                  <SelectValue placeholder="Select a manager" />
                 </SelectTrigger>
                 <SelectContent>
                   {employees
@@ -138,15 +148,34 @@ export default async function EmployeesPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="salaryAmount">Salary (cents)</Label>
-              <Input id="salaryAmount" name="salaryAmount" type="number" min={0} />
+              <Input
+                id="salaryAmount"
+                name="salaryAmount"
+                type="number"
+                min={0}
+                placeholder="100000"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="salaryCurrency">Currency</Label>
-              <Input id="salaryCurrency" name="salaryCurrency" defaultValue="USD" maxLength={3} />
+              <Input
+                id="salaryCurrency"
+                name="salaryCurrency"
+                defaultValue="USD"
+                maxLength={3}
+                placeholder="USD"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="ptoBalanceDays">PTO days</Label>
-              <Input id="ptoBalanceDays" name="ptoBalanceDays" type="number" min={0} defaultValue={15} />
+              <Input
+                id="ptoBalanceDays"
+                name="ptoBalanceDays"
+                type="number"
+                min={0}
+                defaultValue={15}
+                placeholder="15"
+              />
             </div>
             <div className="md:col-span-6">
               <FormSubmitButton>

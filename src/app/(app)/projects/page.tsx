@@ -78,7 +78,12 @@ export default async function ProjectsPage() {
             >
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
-                <Input id="name" name="name" required />
+                <Input
+                  id="name"
+                  name="name"
+                  placeholder="e.g. Acme — Q2 redesign"
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="clientId">Client</Label>
@@ -97,12 +102,23 @@ export default async function ProjectsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
-                <Textarea id="description" name="description" rows={2} />
+                <Textarea
+                  id="description"
+                  name="description"
+                  rows={2}
+                  placeholder="What's the project about?"
+                />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label htmlFor="hourlyRate">Hourly rate (cents)</Label>
-                  <Input id="hourlyRate" name="hourlyRate" type="number" min={0} />
+                  <Input
+                    id="hourlyRate"
+                    name="hourlyRate"
+                    type="number"
+                    min={0}
+                    placeholder="15000"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="currency">Currency</Label>
@@ -111,6 +127,7 @@ export default async function ProjectsPage() {
                     name="currency"
                     defaultValue="USD"
                     maxLength={3}
+                    placeholder="USD"
                   />
                 </div>
               </div>

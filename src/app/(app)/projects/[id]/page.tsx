@@ -138,18 +138,37 @@ export default async function ProjectDetailPage({
               </div>
               <div className="space-y-2">
                 <Label htmlFor="minutes">Minutes</Label>
-                <Input id="minutes" name="minutes" type="number" min={1} required />
+                <Input
+                  id="minutes"
+                  name="minutes"
+                  type="number"
+                  min={1}
+                  placeholder="e.g. 90"
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">What did you do?</Label>
-                <Textarea id="description" name="description" rows={2} required />
+                <Textarea
+                  id="description"
+                  name="description"
+                  rows={2}
+                  placeholder="Brief summary of the work"
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="hourlyRate">
                   Hourly rate override (cents){" "}
                   {project.hourlyRate ? `— default ${(project.hourlyRate / 100).toFixed(2)}` : ""}
                 </Label>
-                <Input id="hourlyRate" name="hourlyRate" type="number" min={0} />
+                <Input
+                  id="hourlyRate"
+                  name="hourlyRate"
+                  type="number"
+                  min={0}
+                  placeholder="Leave blank to use project rate"
+                />
               </div>
               <div className="flex items-center gap-2">
                 <input

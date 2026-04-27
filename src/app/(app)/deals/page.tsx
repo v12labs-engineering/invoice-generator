@@ -97,13 +97,18 @@ export default async function DealsPage() {
           >
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="title">Title</Label>
-              <Input id="title" name="title" required />
+              <Input
+                id="title"
+                name="title"
+                placeholder="e.g. Acme — Q2 retainer"
+                required
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="clientId">Client</Label>
               <Select name="clientId" defaultValue="">
                 <SelectTrigger id="clientId" className="w-full">
-                  <SelectValue placeholder="—" />
+                  <SelectValue placeholder="Select a client" />
                 </SelectTrigger>
                 <SelectContent>
                   {clients.map((c) => (
@@ -116,7 +121,7 @@ export default async function DealsPage() {
               <Label htmlFor="contactId">Contact</Label>
               <Select name="contactId" defaultValue="">
                 <SelectTrigger id="contactId" className="w-full">
-                  <SelectValue placeholder="—" />
+                  <SelectValue placeholder="Select a contact" />
                 </SelectTrigger>
                 <SelectContent>
                   {contacts.map((c) => (
@@ -127,7 +132,13 @@ export default async function DealsPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="value">Value (cents)</Label>
-              <Input id="value" name="value" type="number" min={0} />
+              <Input
+                id="value"
+                name="value"
+                type="number"
+                min={0}
+                placeholder="50000"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="probability">Probability %</Label>
@@ -138,17 +149,24 @@ export default async function DealsPage() {
                 min={0}
                 max={100}
                 defaultValue={0}
+                placeholder="0–100"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="currency">Currency</Label>
-              <Input id="currency" name="currency" defaultValue="USD" maxLength={3} />
+              <Input
+                id="currency"
+                name="currency"
+                defaultValue="USD"
+                maxLength={3}
+                placeholder="USD"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="stage">Stage</Label>
               <Select name="stage" defaultValue="LEAD">
                 <SelectTrigger id="stage" className="w-full">
-                  <SelectValue />
+                  <SelectValue placeholder="Select a stage" />
                 </SelectTrigger>
                 <SelectContent>
                   {STAGES.map((s) => (
@@ -163,7 +181,12 @@ export default async function DealsPage() {
             </div>
             <div className="space-y-2 md:col-span-3">
               <Label htmlFor="notes">Notes</Label>
-              <Textarea id="notes" name="notes" rows={1} />
+              <Textarea
+                id="notes"
+                name="notes"
+                rows={1}
+                placeholder="Decision criteria, key contacts, blockers"
+              />
             </div>
             <div className="md:col-span-6">
               <FormSubmitButton>

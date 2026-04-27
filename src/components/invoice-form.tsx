@@ -432,6 +432,7 @@ export function InvoiceForm({
                 rows={3}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
+                placeholder="Visible on the invoice (e.g. thank-you note)"
               />
             </div>
             <div className="space-y-2">
@@ -442,6 +443,7 @@ export function InvoiceForm({
                 rows={3}
                 value={terms}
                 onChange={(e) => setTerms(e.target.value)}
+                placeholder="Payment terms, late fees, etc."
               />
             </div>
           </CardContent>

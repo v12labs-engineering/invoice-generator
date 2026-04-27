@@ -54,9 +54,27 @@ export default async function SettingsPage() {
             <CardDescription>Appears on every invoice you send.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Field name="name" label="Business name" defaultValue={profile?.name} required />
-            <Field name="email" label="Email" type="email" defaultValue={profile?.email} required />
-            <Field name="phone" label="Phone" defaultValue={profile?.phone ?? ""} />
+            <Field
+              name="name"
+              label="Business name"
+              defaultValue={profile?.name}
+              placeholder="V12 Labs"
+              required
+            />
+            <Field
+              name="email"
+              label="Email"
+              type="email"
+              defaultValue={profile?.email}
+              placeholder="hello@v12labs.com"
+              required
+            />
+            <Field
+              name="phone"
+              label="Phone"
+              defaultValue={profile?.phone ?? ""}
+              placeholder="+1 555 123 4567"
+            />
             <div className="space-y-2">
               <Label htmlFor="addressLines">Address (one line per row)</Label>
               <Textarea
@@ -64,9 +82,15 @@ export default async function SettingsPage() {
                 name="addressLines"
                 rows={3}
                 defaultValue={profile?.addressLines.join("\n") ?? ""}
+                placeholder={"123 Main St\nSan Francisco, CA 94105"}
               />
             </div>
-            <Field name="taxId" label="Tax ID" defaultValue={profile?.taxId ?? ""} />
+            <Field
+              name="taxId"
+              label="Tax ID"
+              defaultValue={profile?.taxId ?? ""}
+              placeholder="GSTIN, VAT, or EIN"
+            />
             <div className="space-y-2">
               <Label htmlFor="bankDetails">Bank details</Label>
               <Textarea
@@ -74,6 +98,7 @@ export default async function SettingsPage() {
                 name="bankDetails"
                 rows={3}
                 defaultValue={profile?.bankDetails ?? ""}
+                placeholder={"Bank: Acme Bank\nAccount: 1234567890\nRouting: 0123456"}
               />
             </div>
           </CardContent>
@@ -90,17 +115,20 @@ export default async function SettingsPage() {
                 name="defaultCurrency"
                 label="Currency"
                 defaultValue={profile?.defaultCurrency ?? "USD"}
+                placeholder="USD"
               />
               <Field
                 name="defaultTaxRate"
                 label="Tax rate (bps)"
                 type="number"
                 defaultValue={String(profile?.defaultTaxRate ?? 0)}
+                placeholder="0"
               />
               <Field
                 name="invoicePrefix"
                 label="Invoice prefix"
                 defaultValue={profile?.invoicePrefix ?? "INV-"}
+                placeholder="INV-"
               />
             </div>
           </CardContent>
@@ -130,17 +158,26 @@ function Field({
   defaultValue,
   type = "text",
   required,
+  placeholder,
 }: {
   name: string;
   label: string;
   defaultValue?: string;
   type?: string;
   required?: boolean;
+  placeholder?: string;
 }) {
   return (
     <div className="space-y-2">
       <Label htmlFor={name}>{label}</Label>
-      <Input id={name} name={name} type={type} defaultValue={defaultValue} required={required} />
+      <Input
+        id={name}
+        name={name}
+        type={type}
+        defaultValue={defaultValue}
+        required={required}
+        placeholder={placeholder}
+      />
     </div>
   );
 }

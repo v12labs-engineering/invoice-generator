@@ -108,7 +108,12 @@ export function EmployeeDocEditor({
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="title">Document title</Label>
-            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. Offer Letter — Jane Doe"
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="body">Body</Label>
