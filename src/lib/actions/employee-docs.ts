@@ -164,3 +164,85 @@ export async function generateEmployeeDoc(input: {
   revalidatePath("/documents");
   return ok({ id: doc.id, url: pub.publicUrl });
 }
+
+/**
+ * Load a generated document for re-editing. Returns null if not found, not
+ * generated (uploaded files have no body), or wrong business.
+ */
+export async function getEmployeeDocForEdit(docId: string) {
+  const { businessId } = await requireMembership();
+  const doc = await db.document.findFirst({
+    where: { id: docId, businessId, employeeId: { not: null } },
+  });
+  if (!doc || !doc.generatedBody || !doc.docType) return null;
+  return {
+    id: doc.id,
+    employeeId: doc.employeeId!,
+    docType: doc.docType,
+    title: doc.title,
+    body: doc.generatedBody,
+    fileUrl: doc.fileUrl,
+  };
+}
+
+/**
+ * Re-render an existing generated document with edited content. Replaces
+ * the underlying storage file (uploaded with upsert=true), keeps the same
+ * Document row id, and updates title / generatedBody / fileSize.
+ */
+export async function updateEmployeeDoc(input: {
+  docId: string;
+  title: string;
+  body: string;
+}): Promise<Result<{ id: string; url: string }>> {
+  const { businessId } = await requireMembership();
+
+  const doc = await db.document.findFirst({
+    where: { id: input.docId, businessId },
+  });
+  if (!doc) return err("Document not found");
+  if (!doc.docType || !doc.generatedBody) {
+    return err("Only generated documents can be edited");
+  }
+  if (!input.title.trim()) return err("Title is required");
+  if (!input.body.trim()) return err("Body is required");
+
+  const business = await db.business.findUnique({ where: { id: businessId } });
+  if (!business) return err("Business not found");
+
+  const pdfBuffer = await renderEmployeeDocPdf({
+    title: input.title,
+    body: input.body,
+    business: {
+      name: business.name,
+      addressLines: business.addressLines,
+      email: business.email,
+      logoUrl: business.logoUrl,
+    },
+  });
+
+  // Reuse the existing storage path so the public URL stays stable.
+  const marker = `/${BUCKET}/`;
+  const idx = doc.fileUrl.indexOf(marker);
+  if (idx === -1) return err("Could not locate underlying file");
+  const path = doc.fileUrl.slice(idx + marker.length);
+
+  const storage = storageClient();
+  const { error: uploadError } = await storage.storage
+    .from(BUCKET)
+    .upload(path, pdfBuffer, { contentType: "application/pdf", upsert: true });
+  if (uploadError) return err(uploadError.message);
+
+  await db.document.update({
+    where: { id: doc.id },
+    data: {
+      title: input.title,
+      generatedBody: input.body,
+      fileSize: pdfBuffer.length,
+    },
+  });
+
+  if (doc.employeeId) revalidatePath(`/employees/${doc.employeeId}`);
+  revalidatePath("/documents");
+  return ok({ id: doc.id, url: doc.fileUrl });
+}

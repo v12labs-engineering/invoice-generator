@@ -21,6 +21,7 @@ import {
   saveTemplateAsDefault,
   resetTemplateToDefault,
   buildPrefilledDoc,
+  updateEmployeeDoc,
 } from "@/lib/actions/employee-docs";
 
 type Props = {
@@ -30,6 +31,8 @@ type Props = {
   initialBody: string;
   isCustomTemplate: boolean;
   business: { name: string; addressLines: string[]; email: string; logoUrl: string | null };
+  /** When set, the editor saves changes to this existing document instead of creating a new one. */
+  editingDocId?: string;
 };
 
 export function EmployeeDocEditor({
@@ -39,22 +42,26 @@ export function EmployeeDocEditor({
   initialBody,
   isCustomTemplate,
   business,
+  editingDocId,
 }: Props) {
   const router = useRouter();
   const [title, setTitle] = useState(initialTitle);
   const [body, setBody] = useState(initialBody);
   const [busy, setBusy] = useState<null | "generate" | "save" | "reset">(null);
   const [customTemplate, setCustomTemplate] = useState(isCustomTemplate);
+  const isEditing = Boolean(editingDocId);
 
   async function onGenerate() {
     setBusy("generate");
-    const res = await generateEmployeeDoc({ employeeId, docType, title, body });
+    const res = isEditing
+      ? await updateEmployeeDoc({ docId: editingDocId!, title, body })
+      : await generateEmployeeDoc({ employeeId, docType, title, body });
     setBusy(null);
     if (!res.ok) {
       toast.error(res.error);
       return;
     }
-    toast.success("Document generated");
+    toast.success(isEditing ? "Document updated" : "Document generated");
     window.open(res.data.url, "_blank");
     router.push(`/employees/${employeeId}`);
   }
@@ -100,9 +107,11 @@ export function EmployeeDocEditor({
     <div className="grid gap-6 lg:grid-cols-2">
       <Card>
         <CardHeader>
-          <CardTitle>Edit</CardTitle>
+          <CardTitle>{isEditing ? "Edit document" : "Edit"}</CardTitle>
           <CardDescription>
-            Variables have been filled in. Review and edit before generating.
+            {isEditing
+              ? "Saving will replace the existing PDF. The download URL stays the same."
+              : "Variables have been filled in. Review and edit before generating."}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -129,26 +138,36 @@ export function EmployeeDocEditor({
           <div className="flex flex-wrap gap-2">
             <Button onClick={onGenerate} disabled={busy !== null}>
               <FileDown className="size-4" />
-              {busy === "generate" ? "Generating..." : "Generate PDF"}
+              {busy === "generate"
+                ? isEditing
+                  ? "Saving..."
+                  : "Generating..."
+                : isEditing
+                  ? "Save changes"
+                  : "Generate PDF"}
             </Button>
-            <Button
-              onClick={onSaveTemplate}
-              variant="outline"
-              disabled={busy !== null}
-              title="Save your edits as the new default for this document type"
-            >
-              <Save className="size-4" />
-              {busy === "save" ? "Saving..." : "Save as default"}
-            </Button>
-            <Button
-              onClick={onReset}
-              variant="ghost"
-              disabled={busy !== null}
-              title="Discard edits and reload the stock template"
-            >
-              <RotateCcw className="size-4" />
-              Reset
-            </Button>
+            {!isEditing && (
+              <>
+                <Button
+                  onClick={onSaveTemplate}
+                  variant="outline"
+                  disabled={busy !== null}
+                  title="Save your edits as the new default for this document type"
+                >
+                  <Save className="size-4" />
+                  {busy === "save" ? "Saving..." : "Save as default"}
+                </Button>
+                <Button
+                  onClick={onReset}
+                  variant="ghost"
+                  disabled={busy !== null}
+                  title="Discard edits and reload the stock template"
+                >
+                  <RotateCcw className="size-4" />
+                  Reset
+                </Button>
+              </>
+            )}
           </div>
           {customTemplate && (
             <p className="text-xs text-muted-foreground">

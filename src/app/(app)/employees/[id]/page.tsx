@@ -226,20 +226,35 @@ export default async function EmployeeDetailPage({
                 .
               </p>
             ) : (
-              employee.documents.map((d) => (
-                <a
-                  key={d.id}
-                  href={d.fileUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block rounded-md border p-2 text-sm hover:bg-muted/40"
-                >
-                  <div className="font-medium">{d.title}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {d.category} · {d.fileName}
+              employee.documents.map((d) => {
+                const isGenerated = Boolean(d.generatedBody && d.docType);
+                return (
+                  <div
+                    key={d.id}
+                    className="flex items-start justify-between gap-2 rounded-md border p-2 text-sm hover:bg-muted/40"
+                  >
+                    <a
+                      href={d.fileUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="min-w-0 flex-1"
+                    >
+                      <div className="truncate font-medium">{d.title}</div>
+                      <div className="truncate text-xs text-muted-foreground">
+                        {d.category} · {d.fileName}
+                      </div>
+                    </a>
+                    {isGenerated && (
+                      <Link
+                        href={`/employees/${employee.id}/documents/${d.id}/edit`}
+                        className="shrink-0 text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                      >
+                        Edit
+                      </Link>
+                    )}
                   </div>
-                </a>
-              ))
+                );
+              })
             )}
           </CardContent>
         </Card>
