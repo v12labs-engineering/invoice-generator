@@ -44,7 +44,7 @@ export default async function SubscriptionsPage() {
     requireMembership(),
   ]);
   const business = await db.business.findUnique({ where: { id: businessId } });
-  const currency = business?.defaultCurrency ?? "USD";
+  const defaultCurrency = business?.defaultCurrency ?? "USD";
 
   const rawStats = await db.expense.groupBy({
     by: ["subscriptionId"],
@@ -60,6 +60,7 @@ export default async function SubscriptionsPage() {
       name: formData.get("name"),
       url: formData.get("url"),
       cost: parseCost(formData),
+      currency: formData.get("currency") || defaultCurrency,
       cycle: formData.get("cycle"),
       startDate: formData.get("startDate"),
       notes: formData.get("notes"),
@@ -72,6 +73,7 @@ export default async function SubscriptionsPage() {
       name: formData.get("name"),
       url: formData.get("url"),
       cost: parseCost(formData),
+      currency: formData.get("currency") || defaultCurrency,
       cycle: formData.get("cycle"),
       notes: formData.get("notes"),
     });
@@ -96,7 +98,7 @@ export default async function SubscriptionsPage() {
           title="Subscriptions"
           description="Recurring services that auto-generate expenses on their billing cycle."
         />
-        <AddSubscriptionDialog action={add} defaultDate={today} />
+        <AddSubscriptionDialog action={add} defaultDate={today} defaultCurrency={defaultCurrency} />
       </div>
 
       {subscriptions.length === 0 ? (
@@ -137,7 +139,7 @@ export default async function SubscriptionsPage() {
                       )}
                     </TableCell>
                     <TableCell className="tabular-nums">
-                      {s.cost != null ? formatMoney(s.cost, currency) : "—"}
+                      {s.cost != null ? formatMoney(s.cost, s.currency) : "—"}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {CYCLE_LABELS[s.cycle] ?? s.cycle}
@@ -155,7 +157,7 @@ export default async function SubscriptionsPage() {
                     </TableCell>
                     <TableCell className="text-right tabular-nums">
                       {stats?._sum.amount != null
-                        ? formatMoney(Number(stats._sum.amount), currency)
+                        ? formatMoney(Number(stats._sum.amount), s.currency)
                         : "—"}
                     </TableCell>
                     <TableCell className="text-right">
@@ -179,6 +181,7 @@ export default async function SubscriptionsPage() {
                             name: s.name,
                             url: s.url,
                             cost: s.cost,
+                            currency: s.currency,
                             cycle: s.cycle,
                             notes: s.notes,
                           }}

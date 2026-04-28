@@ -38,6 +38,7 @@ export type EditableSubscription = {
   name: string;
   url: string | null;
   cost: number | null;
+  currency: string;
   cycle: string;
   notes: string | null;
 };
@@ -95,7 +96,7 @@ export function SubscriptionEditDialog({
               defaultValue={subscription.url ?? ""}
             />
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor={`cost-${subscription.id}`}>Cost</Label>
               <Input
@@ -106,6 +107,15 @@ export function SubscriptionEditDialog({
                 min="0"
                 placeholder="0.00"
                 defaultValue={subscription.cost != null ? (subscription.cost / 100).toFixed(2) : ""}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`currency-${subscription.id}`}>Currency</Label>
+              <Input
+                id={`currency-${subscription.id}`}
+                name="currency"
+                defaultValue={subscription.currency}
+                placeholder="USD"
               />
             </div>
             <div className="space-y-2">

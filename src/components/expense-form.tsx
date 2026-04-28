@@ -43,10 +43,12 @@ export function ExpenseForm({
   expense,
   categories,
   subscriptions,
+  defaultCurrency,
 }: {
   expense?: ExpenseForEdit;
   categories: Category[];
   subscriptions: Subscription[];
+  defaultCurrency: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -64,7 +66,7 @@ export function ExpenseForm({
       date: fd.get("date"),
       categoryId: fd.get("categoryId"),
       subscriptionId: fd.get("subscriptionId"),
-      currency: fd.get("currency") ?? "INR",
+      currency: fd.get("currency") ?? defaultCurrency,
       paymentMethod: fd.get("paymentMethod"),
       reference: fd.get("reference"),
       notes: fd.get("notes"),
@@ -98,7 +100,7 @@ export function ExpenseForm({
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <input type="hidden" name="currency" value={expense?.currency ?? "INR"} />
+      <input type="hidden" name="currency" value={expense?.currency ?? defaultCurrency} />
 
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>

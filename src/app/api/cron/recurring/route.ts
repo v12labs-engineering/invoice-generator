@@ -121,7 +121,7 @@ async function handle(req: Request) {
         description: `${sub.name} — ${sub.cycle.toLowerCase()} subscription`,
         amount: sub.cost,
         date: now,
-        currency: "INR",
+        currency: sub.currency,
       },
     });
 

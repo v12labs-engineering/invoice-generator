@@ -33,7 +33,7 @@ export default async function ExpensesPage({
   ]);
 
   const business = await db.business.findUnique({ where: { id: businessId } });
-  const currency = business?.defaultCurrency ?? "INR";
+  const currency = business?.defaultCurrency ?? "USD";
 
   const total = expenses.reduce((sum, e) => sum + e.amount, 0);
 

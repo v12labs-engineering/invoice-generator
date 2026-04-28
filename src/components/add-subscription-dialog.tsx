@@ -36,12 +36,14 @@ const CYCLES = [
 export function AddSubscriptionDialog({
   action,
   defaultDate,
+  defaultCurrency,
 }: {
   action: (
     prev: Result<{ id: string }> | null,
     fd: FormData,
   ) => Promise<Result<{ id: string }>>;
   defaultDate: string;
+  defaultCurrency: string;
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -78,7 +80,7 @@ export function AddSubscriptionDialog({
             <Label htmlFor="url">URL</Label>
             <Input id="url" name="url" type="url" placeholder="https://..." />
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="costDisplay">Cost</Label>
               <Input
@@ -89,6 +91,15 @@ export function AddSubscriptionDialog({
                 min="0"
                 placeholder="0.00"
                 required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="currency">Currency</Label>
+              <Input
+                id="currency"
+                name="currency"
+                defaultValue={defaultCurrency}
+                placeholder="USD"
               />
             </div>
             <div className="space-y-2">

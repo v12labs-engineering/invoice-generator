@@ -23,6 +23,9 @@ export async function importExpenses(
   const miscCategory = categories.find((c) => c.slug === "miscellaneous");
   if (!miscCategory) return err("Default categories not found");
 
+  const business = await db.business.findUnique({ where: { id: businessId } });
+  const defaultCurrency = business?.defaultCurrency ?? "USD";
+
   let imported = 0;
   let skipped = 0;
   const errors: string[] = [];
@@ -64,7 +67,7 @@ export async function importExpenses(
         amount: amountCents,
         date,
         categoryId: miscCategory.id,
-        currency: "INR",
+        currency: defaultCurrency,
         reference: row.reference || null,
         bulkImportId: bulkImport.id,
       },
