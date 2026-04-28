@@ -6,6 +6,8 @@ import { ExpenseForm } from "@/components/expense-form";
 import { ExpenseAttachments } from "@/components/expense-attachments";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { db } from "@/lib/db";
+import { requireMembership } from "@/lib/actions/_shared";
 
 export default async function ExpenseDetailPage({
   params,
@@ -14,13 +16,17 @@ export default async function ExpenseDetailPage({
 }) {
   const { id } = await params;
 
-  const [expense, categories, subscriptions] = await Promise.all([
+  const [expense, categories, subscriptions, { businessId }] = await Promise.all([
     getExpense(id),
     listCategories(),
     listSubscriptions(),
+    requireMembership(),
   ]);
 
   if (!expense) notFound();
+
+  const business = await db.business.findUnique({ where: { id: businessId } });
+  const defaultCurrency = business?.defaultCurrency ?? "USD";
 
   const expenseForForm = {
     id: expense.id,
@@ -47,7 +53,12 @@ export default async function ExpenseDetailPage({
           <CardTitle>Expense details</CardTitle>
         </CardHeader>
         <CardContent>
-          <ExpenseForm expense={expenseForForm} categories={categories} subscriptions={subscriptions} />
+          <ExpenseForm
+            expense={expenseForForm}
+            categories={categories}
+            subscriptions={subscriptions}
+            defaultCurrency={defaultCurrency}
+          />
         </CardContent>
       </Card>
 

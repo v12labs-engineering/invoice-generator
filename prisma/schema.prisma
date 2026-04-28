@@ -276,6 +276,7 @@ model Subscription {
   name         String
   url          String?
   cost         Int?
+  currency     String    @default("USD")
   cycle        Cadence   @default(MONTHLY)
   startDate    DateTime  @default(now())
   nextRunAt    DateTime?
@@ -320,7 +321,7 @@ model Expense {
   description     String
   date            DateTime
   amount          Int
-  currency        String    @default("INR")
+  currency        String    @default("USD")
   paymentMethod   String?
   reference       String?
   notes           String?

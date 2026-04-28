@@ -6,7 +6,7 @@ export const ExpenseInput = z.object({
   date: z.coerce.date(),
   categoryId: z.string().min(1, "Category is required"),
   subscriptionId: z.string().optional().or(z.literal("")),
-  currency: z.string().default("INR"),
+  currency: z.string().default("USD"),
   paymentMethod: z.string().optional().or(z.literal("")),
   reference: z.string().optional().or(z.literal("")),
   notes: z.string().optional().or(z.literal("")),
