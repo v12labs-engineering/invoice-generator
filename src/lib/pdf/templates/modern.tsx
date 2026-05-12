@@ -2,11 +2,12 @@ import { Document, Page, Text, View, Image, StyleSheet } from "@react-pdf/render
 import { formatMoney } from "@/lib/money";
 import type { InvoicePdfData } from "./shared";
 
-const BRAND = "#2563EB";
-const BRAND_2 = "#7C3AED";
-const INK = "#0A0A0A";
-const MUTED = "#6B7280";
-const BORDER = "#E5E7EB";
+const BRAND = "#111111";
+const BRAND_2 = "#555555";
+const INK = "#111111";
+const MUTED = "#888888";
+const BORDER = "#E5E5E5";
+const SURFACE = "#F9F9F9";
 
 const s = StyleSheet.create({
   page: { padding: 0, fontSize: 10, fontFamily: "Helvetica", color: INK },
@@ -23,7 +24,7 @@ const s = StyleSheet.create({
   metaCol: {},
   metaLabel: { fontSize: 8, color: MUTED, marginBottom: 2, textTransform: "uppercase", letterSpacing: 1 },
   metaValue: { fontSize: 10, fontFamily: "Helvetica-Bold" },
-  billTo: { marginBottom: 28, padding: 16, backgroundColor: "#F9FAFB", borderLeftWidth: 3, borderLeftColor: BRAND },
+  billTo: { marginBottom: 28, padding: 16, backgroundColor: SURFACE, borderLeftWidth: 3, borderLeftColor: BRAND },
   billToLabel: { fontSize: 8, color: MUTED, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 },
   clientName: { fontFamily: "Helvetica-Bold", fontSize: 12, marginBottom: 2 },
   table: { marginTop: 8 },
@@ -34,7 +35,7 @@ const s = StyleSheet.create({
   col2: { flex: 1, textAlign: "right" },
   col3: { flex: 1.5, textAlign: "right" },
   col4: { flex: 1.5, textAlign: "right" },
-  totals: { alignSelf: "flex-end", width: 260, marginTop: 20, padding: 16, backgroundColor: "#F9FAFB" },
+  totals: { alignSelf: "flex-end", width: 260, marginTop: 20, padding: 16, backgroundColor: SURFACE },
   totalRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 3, fontSize: 10 },
   grand: { borderTopWidth: 2, borderColor: BRAND, paddingTop: 8, marginTop: 8, fontFamily: "Helvetica-Bold", fontSize: 12, color: BRAND },
   footerBlock: { marginTop: 28 },
