@@ -48,7 +48,7 @@ export default function LoginPage() {
           <div className="mx-auto flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Receipt className="size-5" />
           </div>
-          <CardTitle className="text-xl font-semibold tracking-tight">Invoicer</CardTitle>
+          <CardTitle className="text-xl font-semibold tracking-tight">V12 Ops</CardTitle>
           <CardDescription>Sign in with a magic link to your email.</CardDescription>
         </CardHeader>
         <CardContent>

@@ -5,13 +5,23 @@ import { PrismaPg } from "@prisma/adapter-pg";
 const adapter = new PrismaPg({ connectionString: process.env.DIRECT_URL ?? process.env.DATABASE_URL });
 const db = new PrismaClient({ adapter });
 
-const EMAIL = process.env.ALLOWED_EMAIL ?? "sharath@v12labs.io";
+function requiredEnv(name: string): string {
+  const value = process.env[name]?.trim();
+  if (!value) {
+    throw new Error(`${name} is required. Copy .env.example to .env and set it.`);
+  }
+  return value;
+}
+
+const EMAIL = requiredEnv("SEED_EMAIL");
+const SEED_NAME = process.env.SEED_NAME?.trim() || "Demo Owner";
+const SEED_BUSINESS_NAME = process.env.SEED_BUSINESS_NAME?.trim() || "Demo Business";
 
 async function main() {
   const user = await db.user.upsert({
     where: { email: EMAIL },
     update: {},
-    create: { email: EMAIL, name: "Sharath" },
+    create: { email: EMAIL, name: SEED_NAME },
   });
 
   // One business per seeded user, with the user as OWNER
@@ -21,7 +31,7 @@ async function main() {
   if (!business) {
     business = await db.business.create({
       data: {
-        name: "V12 Labs",
+        name: SEED_BUSINESS_NAME,
         email: EMAIL,
         addressLines: ["123 Example St", "San Francisco, CA 94102"],
         defaultCurrency: "USD",

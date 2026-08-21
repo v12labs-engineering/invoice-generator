@@ -18,8 +18,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Invoicer",
-  description: "Simple, fast invoice generator.",
+  title: "V12 Ops",
+  description:
+    "A self-hostable workspace for invoicing, customers, projects, expenses, sales, and people operations.",
 };
 
 export default function RootLayout({
